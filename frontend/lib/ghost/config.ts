@@ -89,7 +89,9 @@ const CONFIG_SLUG: Record<Locale, string> = {
 /** Extract the first balanced-looking JSON object from arbitrary text. */
 function extractJson(text: string): string | null {
   const trimmed = text.trim();
-  if (trimmed.startsWith("{")) return trimmed;
+  // Slice from the first "{" to the last "}" even when the text already starts
+  // with "{": there may be trailing content after the closing brace (e.g. a
+  // note below the code block) that would otherwise break JSON.parse.
   const start = trimmed.indexOf("{");
   const end = trimmed.lastIndexOf("}");
   if (start !== -1 && end > start) return trimmed.slice(start, end + 1);
