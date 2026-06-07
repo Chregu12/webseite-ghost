@@ -78,7 +78,9 @@ Blog, Revalidate-Webhook) · **M3** (alle modularen Startseiten-Sektionen aus ge
 Inhalten: Logos, Features, Showcase, Testimonials, neueste Beiträge + Newsletter via Ghost
 Members, je per `site-config` schaltbar) · **M4/SEO** (Tag-Archive, RSS pro Sprache,
 `sitemap.xml`, `robots.txt`, JSON-LD für Article & WebSite, hreflang/RSS-Alternates) ·
-**M7** (clientseitige Suche aus dem Content-Index, content-driven Kontaktseite).
-Als Nächstes: finaler Politur-/Performance-Durchlauf (M8) und End-to-End-Test mit echtem
-Ghost-Container. Siehe Roadmap in
+**M7** (clientseitige Suche aus dem Content-Index, content-driven Kontaktseite) ·
+**M8** (A11y: Skip-Link/Fokus-Stile; SEO: Canonical, x-default, Favicons aus Ghost;
+Performance: responsive Bild-`sizes`). **End-to-End gegen echtes Ghost 6 verifiziert** –
+zwei Bugs gefunden & behoben (slug-Reads, Blog-Filter). Idempotentes `scripts/seed.mjs`.
+Offen: Deployment/Backups (M9). Siehe Roadmap in
 [ANFORDERUNGEN.md](./ANFORDERUNGEN.md#16-roadmap--meilensteine).
