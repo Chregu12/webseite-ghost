@@ -47,7 +47,10 @@ async function ghostFetch<T>(
       return null;
     }
     const json = (await res.json()) as Record<string, unknown>;
-    const data = (json[resource] as T[]) ?? [];
+    // The response key is the base resource ("posts", "pages", "tags"), even for
+    // single-item endpoints like "posts/slug/<slug>".
+    const responseKey = resource.split("/")[0];
+    const data = (json[responseKey] as T[]) ?? [];
     const pagination = (json.meta as { pagination?: GhostPagination } | undefined)
       ?.pagination;
     return { data, pagination };
@@ -86,9 +89,17 @@ async function fetchAllPaginated<T>(
 
 const POST_FIELDS_INCLUDE = { include: "tags,authors", formats: "html" };
 
-/** Build an internal-tag filter for a language (e.g. tag:hash-de). */
-function langFilter(lang?: string): string | undefined {
-  return lang ? `tag:hash-${lang}` : undefined;
+// Internal tags used to drive homepage sections — these posts are NOT blog
+// articles and must be excluded from blog listings, search, RSS and sitemap.
+const SECTION_TAGS = ["feature", "logo", "showcase", "testimonial"];
+const EXCLUDE_SECTIONS = SECTION_TAGS.map((t) => `tag:-hash-${t}`).join("+");
+
+/** Blog-article filter: optional language tag, always excluding section posts. */
+function blogFilter(lang?: string): string {
+  const parts: string[] = [];
+  if (lang) parts.push(`tag:hash-${lang}`);
+  parts.push(EXCLUDE_SECTIONS);
+  return parts.join("+");
 }
 
 /**
@@ -108,11 +119,16 @@ export async function getPosts(opts: {
   };
   const filtered = await ghostFetch<GhostPost>(
     "posts",
-    { ...base, filter: langFilter(lang) },
+    { ...base, filter: blogFilter(lang) },
     ["posts"],
   );
   if (filtered && filtered.data.length > 0) return filtered.data;
-  const fallback = await ghostFetch<GhostPost>("posts", base, ["posts"]);
+  // Fallback (no language-tagged posts yet) — still exclude section posts.
+  const fallback = await ghostFetch<GhostPost>(
+    "posts",
+    { ...base, filter: blogFilter() },
+    ["posts"],
+  );
   return fallback?.data ?? [];
 }
 
@@ -120,13 +136,13 @@ export async function getPosts(opts: {
 export async function getAllPosts(lang?: string): Promise<GhostPost[]> {
   const filtered = await fetchAllPaginated<GhostPost>(
     "posts",
-    { ...POST_FIELDS_INCLUDE, order: "published_at desc", filter: langFilter(lang) },
+    { ...POST_FIELDS_INCLUDE, order: "published_at desc", filter: blogFilter(lang) },
     ["posts"],
   );
   if (filtered.length > 0) return filtered;
   return fetchAllPaginated<GhostPost>(
     "posts",
-    { ...POST_FIELDS_INCLUDE, order: "published_at desc" },
+    { ...POST_FIELDS_INCLUDE, order: "published_at desc", filter: blogFilter() },
     ["posts"],
   );
 }

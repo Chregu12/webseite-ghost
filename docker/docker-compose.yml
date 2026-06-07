@@ -38,6 +38,10 @@ services:
     environment:
       # Public URL of the Ghost site (admin + APIs). Local default below.
       url: ${GHOST_URL:-http://localhost:2368}
+      # Bind on all interfaces (IPv4) so the container is reachable and to avoid
+      # IPv6-only bind failures (EAFNOSUPPORT / code -97) on hosts without IPv6.
+      server__host: 0.0.0.0
+      server__port: "2368"
       database__client: mysql
       database__connection__host: mysql
       database__connection__port: "3306"
