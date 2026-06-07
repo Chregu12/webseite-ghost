@@ -14,8 +14,12 @@ Persönliche Webseite & Blog im **Antigravity-Look**, gebaut als **Headless-Setu
 | `frontend/` | Next.js-Webseite (App Router, TS) |
 | `docker/` | Compose-Stack (Ghost 6 + MySQL + Caddy) |
 | `mcp/` | MCP-Server: Ghost für KI-Agenten ([mcp/README.md](./mcp/README.md)) |
-| `scripts/` | Seed, Backup, Restore |
-| `docs/` | Redaktions- & Deployment-Guide |
+| `scripts/` | Seed, Backup, Restore, **Healthcheck** (Upgrade-Gate) |
+| `docs/` | Redaktions-, Deployment- & **Upgrade**-Guide |
+
+**Upgrade-Sicherheit:** Ghost lässt sich gefahrlos aktualisieren — nach jedem Update prüft
+`node scripts/healthcheck.mjs` den kompletten API-/Render-Vertrag (CI fährt das automatisch).
+Siehe **[docs/UPGRADE.md](./docs/UPGRADE.md)**.
 
 Vollständige Spezifikation: **[ANFORDERUNGEN.md](./ANFORDERUNGEN.md)**.
 

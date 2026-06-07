@@ -13,6 +13,9 @@ const GHOST_URL = (process.env.GHOST_URL ?? "http://localhost:2368").replace(
 );
 const CONTENT_API = `${GHOST_URL}/ghost/api/content`;
 const KEY = process.env.GHOST_CONTENT_API_KEY ?? "";
+// Pinned Ghost API version. Bump deliberately (and run scripts/healthcheck.mjs)
+// when upgrading to a new Ghost major — see docs/UPGRADE.md.
+const API_VERSION = process.env.GHOST_API_VERSION ?? "v6.0";
 
 // Ghost 6: maximum page size is 100 ("limit=all" was removed).
 const MAX_LIMIT = 100;
@@ -39,7 +42,7 @@ async function ghostFetch<T>(
   const url = `${CONTENT_API}/${resource}/?${search.toString()}`;
   try {
     const res = await fetch(url, {
-      headers: { "Accept-Version": "v6.0" },
+      headers: { "Accept-Version": API_VERSION },
       next: { revalidate: DEFAULT_REVALIDATE, tags: ["ghost", ...cacheTags] },
     });
     if (!res.ok) {
@@ -248,7 +251,7 @@ export async function getSettings(): Promise<GhostSettings | null> {
   if (!KEY) return null;
   try {
     const res = await fetch(`${CONTENT_API}/settings/?key=${KEY}`, {
-      headers: { "Accept-Version": "v6.0" },
+      headers: { "Accept-Version": API_VERSION },
       next: { revalidate: DEFAULT_REVALIDATE, tags: ["ghost", "settings"] },
     });
     if (!res.ok) return null;

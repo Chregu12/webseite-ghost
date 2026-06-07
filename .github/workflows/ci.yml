@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  # Always-on gate: types + production builds (no Ghost needed — the frontend
+  # builds against fallbacks).
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Frontend typecheck + build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      - name: MCP build
+        working-directory: mcp
+        run: |
+          npm ci
+          npm run build
+
+  # Upgrade gate: boot the real stack, seed, run the frontend and assert the
+  # full contract with scripts/healthcheck.mjs. A PR that bumps the Ghost image
+  # or GHOST_API_VERSION runs this and fails loudly if the contract breaks.
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Start Ghost + MySQL
+        working-directory: docker
+        run: |
+          cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=ci_db_pw/' .env
+          sed -i 's/^DB_ROOT_PASSWORD=.*/DB_ROOT_PASSWORD=ci_root_pw/' .env
+          sed -i 's#^GHOST_URL=.*#GHOST_URL=http://localhost:2368#' .env
+          docker compose up -d
+
+      - name: Wait for Ghost
+        run: |
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:2368/ghost/api/content/settings/?key=x" || true)
+            if [ "$code" = "401" ] || [ "$code" = "200" ]; then echo "ghost up"; exit 0; fi
+            sleep 5
+          done
+          echo "ghost did not become ready" && docker compose -f docker/docker-compose.yml logs ghost | tail -50 && exit 1
+
+      - name: Bootstrap Ghost (owner + integration keys)
+        run: node scripts/ci-bootstrap.mjs >> "$GITHUB_ENV"
+        env:
+          GHOST_URL: http://localhost:2368
+
+      - name: Seed demo content
+        run: node scripts/seed.mjs
+        env:
+          GHOST_URL: http://localhost:2368
+
+      - name: Build + start frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          npm start &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/de >/dev/null && break; sleep 2; done
+        env:
+          GHOST_URL: http://localhost:2368
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+      - name: Healthcheck (upgrade contract)
+        run: node scripts/healthcheck.mjs
+        env:
+          SITE_URL: http://localhost:3000
+          GHOST_URL: http://localhost:2368
