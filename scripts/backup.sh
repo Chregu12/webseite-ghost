@@ -35,10 +35,19 @@ docker compose run --rm --no-deps -T \
   tar czf "/backup/content-$TS.tar.gz" -C /var/lib/ghost/content . >/dev/null
 
 echo "[backup] rotating (keeping $KEEP) …"
-for prefix in db content; do
-  ls -1t "$BACKUP_DIR/$prefix-"*.tar.gz "$BACKUP_DIR/$prefix-"*.sql.gz 2>/dev/null \
-    | tail -n +"$((KEEP + 1))" | xargs -r rm -f
+# db-*.sql.gz and content-*.tar.gz each have exactly one extension, so rotate
+# each set independently. nullglob makes a non-matching glob expand to nothing
+# instead of a literal pattern that would make `ls`/the pipeline fail under
+# `set -euo pipefail` (which previously aborted before content was rotated).
+# Timestamps are lexically sortable, so a plain reverse sort = newest first.
+shopt -s nullglob
+for spec in "db:sql.gz" "content:tar.gz"; do
+  prefix="${spec%%:*}"; ext="${spec#*:}"
+  files=("$BACKUP_DIR/$prefix-"*."$ext")
+  ((${#files[@]} > KEEP)) || continue
+  printf '%s\n' "${files[@]}" | sort -r | tail -n +"$((KEEP + 1))" | xargs -r rm -f
 done
+shopt -u nullglob
 
 echo "[backup] done -> $BACKUP_DIR"
 ls -lh "$BACKUP_DIR" | grep "$TS" || true

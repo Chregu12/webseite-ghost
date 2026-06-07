@@ -14,9 +14,22 @@ export default function Header({
   dict: Dictionary;
 }) {
   const brand = settings?.title || "Mein Blog";
+  const locales = ["de", "en"];
+  // Ghost navigation URLs are site-relative and carry no locale (e.g. "/about/").
+  // Prefix internal paths with the current locale; leave external links,
+  // anchors and already-localized paths untouched.
+  const localizeUrl = (url: string) => {
+    if (!url.startsWith("/")) return url; // external or hash links
+    const segments = url.split("/");
+    if (locales.includes(segments[1])) return url; // already localized
+    return `/${lang}${url === "/" ? "" : url}`;
+  };
   const nav =
     settings?.navigation && settings.navigation.length > 0
-      ? settings.navigation
+      ? settings.navigation.map((item) => ({
+          label: item.label,
+          url: localizeUrl(item.url),
+        }))
       : [
           { label: dict.nav.blog, url: `/${lang}/blog` },
           { label: dict.nav.about, url: `/${lang}/about` },

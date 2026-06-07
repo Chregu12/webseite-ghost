@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getAllPosts, getPostBySlug } from "@/lib/ghost/content";
+import { locales } from "@/i18n/dictionaries";
 import { abs } from "@/lib/site";
 import JsonLd from "@/components/JsonLd";
 
@@ -10,7 +11,9 @@ export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  return locales.flatMap((lang) =>
+    posts.map((post) => ({ lang, slug: post.slug })),
+  );
 }
 
 export async function generateMetadata({
@@ -25,7 +28,14 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.custom_excerpt || post.excerpt || "",
-    alternates: { canonical, languages: { "x-default": canonical } },
+    alternates: {
+      canonical,
+      languages: {
+        de: abs(`/de/blog/${post.slug}`),
+        en: abs(`/en/blog/${post.slug}`),
+        "x-default": abs(`/de/blog/${post.slug}`),
+      },
+    },
     openGraph: {
       type: "article",
       title: post.title,
