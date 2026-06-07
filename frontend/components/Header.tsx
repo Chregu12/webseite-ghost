@@ -20,6 +20,7 @@ export default function Header({
       : [
           { label: dict.nav.blog, url: `/${lang}/blog` },
           { label: dict.nav.about, url: `/${lang}/about` },
+          { label: dict.nav.contact, url: `/${lang}/contact` },
         ];
 
   return (
@@ -34,6 +35,9 @@ export default function Header({
               {item.label}
             </Link>
           ))}
+          <Link href={`/${lang}/search`} aria-label={dict.nav.search} title={dict.nav.search}>
+            ⌕
+          </Link>
           <LanguageSwitcher lang={lang} label={dict.actions.switchLanguage} />
           <ThemeToggle label={dict.actions.toggleTheme} />
         </nav>

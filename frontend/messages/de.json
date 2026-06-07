@@ -2,7 +2,13 @@
   "nav": {
     "blog": "Blog",
     "about": "Über mich",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "search": "Suche"
+  },
+  "search": {
+    "title": "Suche",
+    "placeholder": "Beiträge durchsuchen…",
+    "noResults": "Keine Treffer."
   },
   "actions": {
     "readMore": "Weiterlesen",

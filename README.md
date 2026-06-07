@@ -71,6 +71,8 @@ Umgesetzt: **M1** (Docker-Setup) · **M2** (Next.js-Grundgerüst + Content-API-C
 Blog, Revalidate-Webhook) · **M3** (alle modularen Startseiten-Sektionen aus getaggten
 Inhalten: Logos, Features, Showcase, Testimonials, neueste Beiträge + Newsletter via Ghost
 Members, je per `site-config` schaltbar) · **M4/SEO** (Tag-Archive, RSS pro Sprache,
-`sitemap.xml`, `robots.txt`, JSON-LD für Article & WebSite, hreflang/RSS-Alternates).
-Als Nächstes: **Suche** (M7) bzw. weiterer Feinschliff. Siehe Roadmap in
+`sitemap.xml`, `robots.txt`, JSON-LD für Article & WebSite, hreflang/RSS-Alternates) ·
+**M7** (clientseitige Suche aus dem Content-Index, content-driven Kontaktseite).
+Als Nächstes: finaler Politur-/Performance-Durchlauf (M8) und End-to-End-Test mit echtem
+Ghost-Container. Siehe Roadmap in
 [ANFORDERUNGEN.md](./ANFORDERUNGEN.md#16-roadmap--meilensteine).

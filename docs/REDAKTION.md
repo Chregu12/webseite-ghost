@@ -72,6 +72,14 @@ Tag** gepflegt:
 
 Zusätzlich Sprach-Tag `#de`/`#en` setzen. Reihenfolge = Veröffentlichungsdatum (aufsteigend).
 
+## 3b. Seiten: Über mich & Kontakt
+
+- **Über mich:** Seite mit Slug `about` (DE) bzw. `about-en` (EN).
+- **Kontakt:** Seite mit Slug `contact` (DE) bzw. `contact-en` (EN). Den Inhalt frei im
+  Koenig-Editor gestalten – ein Kontaktformular lässt sich per **HTML-Card** einbetten
+  (z. B. Formspree/Tally) oder einfach E-Mail/Social-Links angeben.
+- **Suche:** läuft automatisch über alle Beiträge (`/de/search`), nichts zu pflegen.
+
 ## 4. Branding, Navigation, Akzentfarbe
 
 - **Akzentfarbe / Logo / Icon:** Einstellungen → **Design** (wird live ins Frontend übernommen).
