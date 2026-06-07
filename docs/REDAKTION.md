@@ -74,7 +74,9 @@ Zusätzlich Sprach-Tag `#de`/`#en` setzen. Reihenfolge = Veröffentlichungsdatum
 
 ## 3b. Seiten: Über mich & Kontakt
 
-- **Über mich:** Seite mit Slug `about` (DE) bzw. `about-en` (EN).
+- **Über mich:** Ghost legt beim Setup automatisch eine Seite mit Slug **`about`** an
+  („About this site"). **Einfach diese vorhandene Seite bearbeiten** – keine neue anlegen,
+  sonst entsteht eine Dublette (`about-2`). Für Englisch eine Seite mit Slug `about-en`.
 - **Kontakt:** Seite mit Slug `contact` (DE) bzw. `contact-en` (EN). Den Inhalt frei im
   Koenig-Editor gestalten – ein Kontaktformular lässt sich per **HTML-Card** einbetten
   (z. B. Formspree/Tally) oder einfach E-Mail/Social-Links angeben.
@@ -89,3 +91,24 @@ Zusätzlich Sprach-Tag `#de`/`#en` setzen. Reihenfolge = Veröffentlichungsdatum
 
 Nach **Veröffentlichen/Ändern** in Ghost wird das Frontend automatisch aktualisiert
 (Webhook → `/api/revalidate`). Es kann wenige Sekunden dauern.
+
+## 6. Newsletter & E-Mail (SMTP)
+
+Die Newsletter-Anmeldung nutzt Ghost **Members** und verschickt einen **Magic-Link** per
+E-Mail. Dafür muss in Ghost **SMTP konfiguriert** sein (in `docker/.env` die `MAIL_*`-Werte,
+z. B. Mailgun/Postmark). Ohne SMTP schlägt das Versenden fehl (lokal normal) – die Anmeldung
+funktioniert erst in Produktion mit gültigem Mail-Zugang.
+
+## 7. Demo-Inhalte schnell anlegen (optional, für Entwickler)
+
+Für eine frische lokale Installation kann mit einem Skript Beispiel-Inhalt erzeugt werden
+(`site-config`, About/Kontakt, getaggte Beiträge). Voraussetzung: ein **Admin-API-Key** aus
+einer Custom Integration (Einstellungen → Integrationen).
+
+```bash
+GHOST_URL=http://localhost:2368 \
+GHOST_ADMIN_API_KEY=<id>:<secret> \
+node scripts/seed.mjs
+```
+
+Das Skript ist **idempotent** (findet bestehende Inhalte per Slug und aktualisiert sie).

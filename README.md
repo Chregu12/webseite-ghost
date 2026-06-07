@@ -54,6 +54,12 @@ npm run dev
 Siehe **[docs/REDAKTION.md](./docs/REDAKTION.md)** – u. a. die `site-config`-Seite (JSON)
 für Hero-Texte & Sektions-Schalter sowie die Tag-Konventionen (`#feature`, `#de`/`#en`).
 
+Optional: schnell Demo-Inhalte erzeugen (idempotent, Admin-API-Key nötig):
+
+```bash
+GHOST_URL=http://localhost:2368 GHOST_ADMIN_API_KEY=<id>:<secret> node scripts/seed.mjs
+```
+
 ## Produktion
 
 ```bash
