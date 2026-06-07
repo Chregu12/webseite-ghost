@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getAllPosts, getPostBySlug } from "@/lib/ghost/content";
+import { abs } from "@/lib/site";
+import JsonLd from "@/components/JsonLd";
 
 export const revalidate = 3600;
 
@@ -50,8 +52,23 @@ export default async function PostPage({
       })
     : "";
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    image: post.feature_image ? [post.feature_image] : undefined,
+    datePublished: post.published_at ?? undefined,
+    dateModified: post.updated_at ?? post.published_at ?? undefined,
+    author: post.primary_author
+      ? { "@type": "Person", name: post.primary_author.name }
+      : undefined,
+    mainEntityOfPage: abs(`/${lang}/blog/${post.slug}`),
+    url: abs(`/${lang}/blog/${post.slug}`),
+  };
+
   return (
     <article className="section">
+      <JsonLd data={jsonLd} />
       <div className="container">
         <Link href={`/${lang}/blog`} className="muted" style={{ fontSize: "0.9rem" }}>
           ← {dict.blog.backToBlog}

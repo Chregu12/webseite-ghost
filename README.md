@@ -70,6 +70,7 @@ einrichten (Events: `post.*`, `page.*`, `tag.*`, `settings.changed`).
 Umgesetzt: **M1** (Docker-Setup) · **M2** (Next.js-Grundgerüst + Content-API-Client, i18n,
 Blog, Revalidate-Webhook) · **M3** (alle modularen Startseiten-Sektionen aus getaggten
 Inhalten: Logos, Features, Showcase, Testimonials, neueste Beiträge + Newsletter via Ghost
-Members, je per `site-config` schaltbar).
-Als Nächstes: **M4** (Tag-Archive, Autorenseite, RSS, Sitemap) bzw. Feinschliff. Siehe Roadmap in
+Members, je per `site-config` schaltbar) · **M4/SEO** (Tag-Archive, RSS pro Sprache,
+`sitemap.xml`, `robots.txt`, JSON-LD für Article & WebSite, hreflang/RSS-Alternates).
+Als Nächstes: **Suche** (M7) bzw. weiterer Feinschliff. Siehe Roadmap in
 [ANFORDERUNGEN.md](./ANFORDERUNGEN.md#16-roadmap--meilensteine).

@@ -6,6 +6,8 @@ import { getSettings } from "@/lib/ghost/content";
 import { getSiteConfig } from "@/lib/ghost/config";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import JsonLd from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -34,6 +36,7 @@ export async function generateMetadata({
     description: settings?.description ?? "",
     alternates: {
       languages: { de: "/de", en: "/en" },
+      types: { "application/rss+xml": `/${lang}/rss.xml` },
     },
     openGraph: {
       type: "website",
@@ -69,6 +72,16 @@ export default async function LangLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body style={accent ? ({ "--accent": accent } as React.CSSProperties) : undefined}>
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: settings?.title ?? "Mein Blog",
+            description: settings?.description ?? "",
+            url: `${SITE_URL}/${lang}`,
+            inLanguage: lang,
+          }}
+        />
         <Header lang={lang} settings={settings} dict={dict} />
         <main>{children}</main>
         <Footer config={config} dict={dict} />

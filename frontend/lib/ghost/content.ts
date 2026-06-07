@@ -170,6 +170,38 @@ export async function getTags(): Promise<GhostTag[]> {
   return fetchAllPaginated<GhostTag>("tags", { include: "count.posts" }, ["tags"]);
 }
 
+/** Public, non-internal tags (for archives / sitemap). */
+export async function getPublicTags(): Promise<GhostTag[]> {
+  const tags = await getTags();
+  return tags.filter((t) => t.visibility === "public" && !t.name.startsWith("#"));
+}
+
+export async function getTagBySlug(slug: string): Promise<GhostTag | null> {
+  const res = await ghostFetch<GhostTag>(
+    `tags/slug/${encodeURIComponent(slug)}`,
+    { include: "count.posts" },
+    ["tags", `tag:${slug}`],
+  );
+  return res?.data?.[0] ?? null;
+}
+
+/** Published posts carrying a public tag, optionally narrowed to a language. */
+export async function getPostsByTag(slug: string, lang?: string): Promise<GhostPost[]> {
+  const parts = [`tag:${slug}`];
+  if (lang) parts.push(`tag:hash-${lang}`);
+  const filtered = await fetchAllPaginated<GhostPost>(
+    "posts",
+    { ...POST_FIELDS_INCLUDE, filter: parts.join("+"), order: "published_at desc" },
+    ["posts", `tag:${slug}`],
+  );
+  if (filtered.length > 0 || !lang) return filtered;
+  return fetchAllPaginated<GhostPost>(
+    "posts",
+    { ...POST_FIELDS_INCLUDE, filter: `tag:${slug}`, order: "published_at desc" },
+    ["posts", `tag:${slug}`],
+  );
+}
+
 export async function getSettings(): Promise<GhostSettings | null> {
   // /settings/ is not array-wrapped; fetch raw.
   if (!KEY) return null;
