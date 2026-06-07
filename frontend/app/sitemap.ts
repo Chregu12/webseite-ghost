@@ -20,6 +20,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.5,
     });
+    entries.push({
+      url: `${SITE_URL}/${lang}/contact`,
+      changeFrequency: "yearly",
+      priority: 0.4,
+    });
 
     const posts = await getAllPosts(lang);
     for (const post of posts) {
