@@ -145,7 +145,7 @@ zwischen Ghost-Inhalten und Next.js-Sektionen:
 | Editierbar im Admin | Ghost-Mechanismus | Im Frontend gelesen über |
 |---|---|---|
 | Seitentitel, Beschreibung, **Akzentfarbe**, Logo, Icon, Cover, **Navigation** (primär/sekundär) | Ghost **Settings** (Design/General/Navigation) | Content API `settings` |
-| **Globale Texte & Toggles** (Hero-Headline/Subtext, CTA-Labels+Links, Sektion an/aus, Footer-Text) | Eine **Config-Page** mit JSON in einer Code-Card (Slug `site-config`) | Content API `pages/slug/site-config` → JSON parsen |
+| **Globale Texte & Toggles** (Hero-Headline/Subtext, CTA-Labels+Links, Sektion an/aus, Footer-Text) | **Entschieden:** Eine **Config-Page** mit **JSON** in einer Code-Card (Slug `site-config`), **zod-validiert** | Content API `pages/slug/site-config` → JSON parsen |
 | **Sektions-Überschrift/Intro** (z. B. „Features") | **Tag**-Felder (`name`, `description`, `feature_image`) | Content API `tags` |
 | **Wiederholbare Karten** (Features, Logos, Testimonials, Projekte) | **Posts/Pages mit internem Tag** (`#feature`, `#logo`, `#testimonial`, `#project`) + Felder `title`, `excerpt`/`custom_excerpt`, `feature_image`, `published` | Content API `posts?filter=tag:hash-feature` |
 | **Blogposts** | normale **Posts** (Koenig-Editor, Tags `#de`/`#en`) | Content API `posts` |
@@ -300,8 +300,8 @@ frontend/
   (Article/Person), Canonicals.
 - **Security:** TLS überall; Content-Key nur server-side; Admin-API-Key & Webhook-Secret via `.env`
   (nicht im Repo); Ghost-Admin hinter starkem Passwort/2FA; DB nicht öffentlich; aktuelle Versionen.
-- **Datenschutz (DSGVO):** Impressum & Datenschutz als Ghost-Pages; cookielose Analytics
-  (Ghost-nativ oder Plausible/umami); Member-Daten in Ghost.
+- **Datenschutz (DSGVO):** Impressum & Datenschutz als Ghost-Pages; **Analytics: Ghost-native,
+  cookielose Analytics (entschieden)** – kein Cookie-Banner nötig; Member-Daten in Ghost.
 - **Resilienz:** Frontend fällt bei Ghost-Ausfall auf zuletzt gebauten Stand zurück (ISR-Cache).
 - **Wartbarkeit:** Monorepo, TypeScript, Lint/Format, dokumentiert, reproduzierbares Docker-Setup.
 
@@ -376,9 +376,10 @@ webseite-ghost/
 
 ## 17. Offene Punkte / Risiken
 
-1. **Keine Custom-Fields in Ghost** → Config-Page-JSON & Tag-Konventionen. Mitigation: `zod`-Schema
-   + klare Redaktions-Doku, damit JSON nicht „kaputt" editiert wird (alternativ pro Feld eigene
-   Page/Tag-Felder, weniger fehleranfällig, mehr Klicks).
+1. **Keine Custom-Fields in Ghost** → **Entschieden: Config-Page-JSON** (+ Tag-Konventionen).
+   Mitigation gegen „kaputt editiertes" JSON: **`zod`-Schema** mit klaren Fehlermeldungen, sinnvolle
+   Defaults/Fallbacks bei Validierungsfehler (Seite bleibt baubar), und ein **Redaktions-Guide** in
+   `docs/` mit kommentiertem Beispiel-JSON.
 2. **Webhook-Zuverlässigkeit:** verpasste Events → periodischer Fallback-Revalidate (Zeit-basiert)
    zusätzlich zu Event-basiert.
 3. **Mehrsprachigkeit = doppelte Pflege**; Paarung per Konvention (akzeptiert).
@@ -394,7 +395,7 @@ webseite-ghost/
 - Logo / Markenname / Akzentfarbe(n)
 - SMTP-Zugang (Members/Newsletter)
 - Startinhalte: Hero-Texte, „Über mich", erste Blogposts, Impressum/Datenschutz
-- Analytics-Präferenz (Ghost-nativ / Plausible / umami / keines)
+- ~~Analytics-Präferenz~~ → **entschieden: Ghost-native cookielose Analytics**
 
 ---
 
