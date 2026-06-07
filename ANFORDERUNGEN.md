@@ -1,380 +1,402 @@
-# Anforderungen: Persönliche Webseite & Blog mit Ghost (Antigravity-Look)
+# Anforderungen: Persönliche Webseite & Blog – Headless Ghost 6 + Next.js (Antigravity-Look)
 
-> **Status:** Entwurf v1 · **Datum:** 2026-06-07 · **Branch:** `claude/ghost-website-editable-backend-eOKji`
-> **Ziel dieses Dokuments:** Eine vollständige, umsetzbare End-to-End-Spezifikation, bevor Code geschrieben wird.
+> **Status:** Entwurf v2 (Headless) · **Datum:** 2026-06-07 · **Branch:** `claude/ghost-website-editable-backend-eOKji`
+> **Architektur-Entscheidung:** Ghost 6 läuft **headless** als CMS & Admin-Panel. Das **Frontend bauen wir selbst** mit **Next.js** und nutzen **alle Ghost-APIs** (Content API, Admin API, Webhooks, Members). Ghost ist die „WordPress-artige", codefreie Redaktionsoberfläche; das Rendering/Design liegt vollständig bei uns.
 
 ---
 
 ## 1. Vision & Ziel
 
-Eine **persönliche Webseite mit Blog**, die optisch und vom Aufbau her an
-[antigravity.google](https://antigravity.google/) angelehnt ist (modernes, dunkles,
-„agentic-tech"-Design), aber inhaltlich **vollständig über das Ghost-Admin-Panel
-pflegbar** ist – **ohne dass Code angefasst werden muss** (Anspruch: „so wie bei WordPress").
+Eine **persönliche Webseite mit Blog** im Stil von [antigravity.google](https://antigravity.google/)
+(dunkel, modern, „agentic-tech"), bei der **alle Inhalte über das Ghost-6-Admin gepflegt** werden –
+**ohne Code anzufassen** (Anspruch „wie WordPress") – während das Frontend ein eigenes, frei
+gestaltetes Next.js-Projekt ist.
 
 ### Leitprinzipien
-1. **Content-driven:** Jeder sichtbare Text, jedes Bild, jede Sektion, jeder Link und jede
-   Farbe der Startseite ist im Admin editierbar. Kein „Text steht im Template fest".
-2. **Kein Code zum Pflegen:** Redaktioneller Alltag (Blogpost schreiben, Hero-Text ändern,
-   Sektion ein-/ausblenden, Navigation anpassen) passiert ausschließlich im Ghost-Admin.
-3. **Zweisprachig (DE + EN):** Inhalte und UI in Deutsch und Englisch, mit Sprachumschalter.
-4. **Self-hosted:** Betrieb via Docker, volle Datenhoheit, reproduzierbares Setup.
-5. **Modern & schnell:** Dunkles Design, gute Core-Web-Vitals, A11y- und SEO-tauglich.
+1. **Headless:** Ghost 6 = Quelle der Wahrheit + Redaktion. Next.js = Präsentation.
+2. **Content-driven & codefrei pflegbar:** Hero-Texte, Sektionen, Karten, Navigation, Farben,
+   Blogposts – alles im Ghost-Admin editierbar. Konventionen (siehe §6) statt Hardcoding.
+3. **Alle Ghost-APIs nutzen:** Content API (lesen), Admin API (Build/Automation), Webhooks
+   (gezieltes Neu-Generieren), Members (Newsletter/Gated Content).
+4. **Zweisprachig (DE + EN):** Next.js-i18n-Routing `/de` `/en`, gepaart mit Ghost-Tag-Collections.
+5. **Self-hosted:** Ghost + MySQL + Next.js + Reverse-Proxy in **einem Docker-Compose**.
+6. **Hybrid-Rendering:** SSG/ISR für Inhalte, Client/dynamisch für Members, Newsletter, Suche.
 
 ### Nicht-Ziele (v1)
-- Kein E-Commerce / Shop.
-- Kein 1:1-Klon der Antigravity-Inhalte (nur Stil & Struktur als Vorbild).
-- Keine komplexe Mehrmandantenfähigkeit.
+- Kein Shop/E-Commerce. Kein 1:1-Antigravity-Klon (nur Stil/Struktur). Kein WYSIWYG-Pagebuilder
+  mit freiem Drag&Drop der Sektionen (Ghost-untypisch; v1 nutzt Konventionen + Toggles).
 
 ---
 
-## 2. Referenz-Design-Analyse (Antigravity-Look)
+## 2. Referenz-Design (Antigravity-Look)
 
-Beobachteter Stil von Google Antigravity, übertragen auf eine persönliche Seite:
+| Merkmal | Übernahme |
+|---|---|
+| Grundton | Sehr dunkel (fast schwarz), hoher Kontrast; Light-Mode optional |
+| Akzent | 1–2 Akzentfarben + Verlauf (Blau/Violett/Cyan), aus Ghost editierbar (`accent_color`) |
+| Typografie | Große, fette Sans-Headlines; klare Body-Schrift (Inter/Geist/„Google-Sans-like") |
+| Hero | Riesige Headline, kurzer Subtext, 2 prominente CTAs, animiertes/3D-Visual |
+| Sektionen | Feature-Karten, Split-Showcases, Logo-Leiste, CTA-Band – modular |
+| Cards | Abgerundet, feine Border, dezenter Glow/Glas-Effekt |
+| Motion | Subtile Scroll-/Hover-Effekte; aus bei `prefers-reduced-motion` |
 
-| Merkmal | Antigravity | Übernahme für unsere Seite |
+Stilquellen: [Google Developers Blog – Antigravity](https://developers.googleblog.com/build-with-google-antigravity-our-new-agentic-development-platform/) · [antigravity.google](https://antigravity.google/)
+
+---
+
+## 3. Architektur (Headless)
+
+```
+                          ┌───────────────────────────────────────────────┐
+        Besucher ───────► │  Reverse Proxy (Caddy) + TLS (Let's Encrypt)   │
+   example.com            └───┬───────────────────────────────┬───────────┘
+                              │ (Website)                     │ (CMS/API/Admin)
+                  ┌───────────▼───────────┐        ┌──────────▼──────────────┐
+                  │  Next.js (Node, Docker)│        │  Ghost 6 (Node, Docker) │
+                  │  - App Router, i18n    │        │  - Admin-Panel (Redaktion)
+                  │  - SSG/ISR + Client    │◄──────►│  - Content API (read)    │
+                  │  - /api/revalidate     │  HTTPS │  - Admin API (write)     │
+                  │  - Members/Newsletter  │  API   │  - Members API           │
+                  └───────────┬───────────┘        │  - Webhooks ─────────────┼─┐
+                              │                     └──────────┬──────────────┘ │
+                              │                                │                │ webhook
+                              │                     ┌──────────▼──────────┐     │ on publish
+                              │                     │   MySQL 8 (Docker)  │     │
+                              │                     └─────────────────────┘     │
+                              └◄──────────── POST /api/revalidate ──────────────┘
+```
+
+- **CMS/Daten/Redaktion:** Ghost 6, self-hosted (Docker). Erreichbar unter eigener Domain
+  (z. B. `cms.example.com`) für Admin + APIs.
+- **Frontend:** Next.js (App Router) unter der Hauptdomain (`example.com`), eigener Container.
+- **DB:** MySQL 8 (Ghost-Standard in v6), eigener Container, persistentes Volume.
+- **Proxy/TLS:** Caddy (automatisches Let's-Encrypt-TLS) routet `example.com` → Next.js und
+  `cms.example.com` → Ghost.
+- **Daten-Fluss:**
+  - **Build/Render:** Next.js liest Inhalte server-side über die **Content API** (gecached).
+  - **Aktualität:** Ghost-**Webhooks** rufen `POST /api/revalidate` in Next.js → gezieltes
+    On-demand-Revalidate (ISR) der betroffenen Pfade/Tags.
+  - **Automation/Seed:** **Admin API** (JWT) für Skripte (z. B. Demo-Inhalte anlegen, Bilder-Upload).
+  - **Members:** Newsletter-Anmeldung & ggf. Gated Content über Ghost **Members**.
+
+### Domains/Umgebung
+| Zweck | Domain (Beispiel) | Service |
 |---|---|---|
-| **Grundton** | Sehr dunkel (fast schwarz), hoher Kontrast | Dunkles Theme als Default (heller Modus optional) |
-| **Akzentfarben** | Google-Spektrum, dezente Verläufe (Blau/Violett/Cyan) | 1–2 Akzentfarben + Verlauf, im Admin einstellbar |
-| **Typografie** | Große, fette Sans-Serif-Headlines; klare Body-Schrift | Variable Sans (z. B. Inter / Geist / Google Sans-ähnlich) |
-| **Hero** | Riesige Headline, kurzer Subtext, prominente CTAs, animiertes/3D-Visual | Editierbarer Hero mit Headline, Subtext, 2 CTAs, Hintergrund-Visual |
-| **Sektionen** | Feature-Blöcke, abwechselnd Text/Visual, Karten mit Rundungen & feinen Rändern | Wiederverwendbare, editierbare Sektionstypen (siehe §6) |
-| **Logo-/Model-Leiste** | „Powered by"-Logos | „Tools/Skills/Logos"-Leiste, editierbar |
-| **Cards** | Abgerundete Ecken, subtile Border, leichter Glow/Glas-Effekt | Karten-Komponente mit denselben Tokens |
-| **Whitespace** | Großzügig, ruhig | Großzügige vertikale Rhythmik |
-| **Animation** | Subtile Scroll-/Hover-Effekte | Dezente, performante Effekte (reduziert bei `prefers-reduced-motion`) |
-
-> Quellen zum Stil: [Google Developers Blog – Antigravity](https://developers.googleblog.com/build-with-google-antigravity-our-new-agentic-development-platform/),
-> [antigravity.google](https://antigravity.google/).
+| Webseite (öffentlich) | `example.com` | Next.js |
+| Ghost-Admin & APIs | `cms.example.com` | Ghost 6 |
 
 ---
 
-## 3. Technische Architektur
+## 4. Ghost-6-APIs – konkrete Nutzung
 
-```
-                 ┌─────────────────────────────────────────────┐
-   Besucher ───► │  Reverse Proxy (Caddy/Nginx) + TLS (Let's Encrypt)
-                 └───────────────┬─────────────────────────────┘
-                                 │
-                    ┌────────────▼───────────┐      ┌──────────────────┐
-                    │  Ghost (Node, Docker)  │◄────►│  MySQL 8 (Docker) │
-                    │  - Custom Theme        │      └──────────────────┘
-                    │  - Routes/Collections  │
-                    │  - Theme Settings      │      ┌──────────────────┐
-                    │  - Content API         │◄────►│  Volumes:        │
-                    └────────────────────────┘      │  content/, db/   │
-                                                     └──────────────────┘
-```
+### 4.1 Content API (read-only, public)
+- **Auth:** Content-API-Key (Query-Param), serverseitig in Next.js verwendet.
+- **Ressourcen:** `posts`, `pages`, `authors`, `tags`, `tiers`, `settings`, `site`.
+- **Parameter:** `filter` (z. B. `tag:hash-feature+visibility:public`), `include` (`tags,authors`),
+  `fields`, `order`, `page`, `limit`.
+- **⚠ Ghost 6 Breaking Change:** **kein `limit=all`**, **max. 100 Items/Seite** → wir
+  **paginieren** generisch in einem API-Client (`fetchAllPaginated`).
+- **Inhaltsformat:** HTML (`formats=html`) für Render; optional `lexical` falls wir selbst rendern.
+- **Caching:** voll cachebar, keine Rate-Limits → mit `revalidateTag`/`fetch`-Cache kombinieren.
 
-- **CMS:** Ghost (neueste stabile Version), self-hosted im Docker-Container.
-- **DB:** MySQL 8 (Ghost-empfohlen), eigener Container, persistentes Volume.
-- **Reverse Proxy:** Caddy (automatisches TLS) **oder** Nginx + Certbot.
-- **Theme:** **Eigenes Custom-Theme** (Handlebars `.hbs`), das die Editierbarkeit ermöglicht.
-- **Persistenz:** Docker-Volumes für `content/` (Bilder, Theme, Settings) und MySQL-Daten.
-- **Backups:** Tägliches DB-Dump + `content/`-Snapshot (Cron / Skript).
+### 4.2 Admin API (CRUD, server-side)
+- **Auth:** JWT aus Admin-API-Key (kurzlebig, max. 5 Min) **oder** Staff-Token.
+- **Nutzung bei uns:** Seed-/Migrations-Skripte, Bild-Upload, Anlegen von Demo-Sektionen,
+  ggf. Programmatic Publishing. **Niemals** im Browser/Client – nur in serverseitigen Skripten/Routes.
+- **Quellformat:** **Lexical** (Standard in v6) bzw. HTML.
 
-### Warum Custom-Theme statt fertigem Theme?
-Der Antigravity-Look + die WordPress-artige Editierbarkeit jeder Sektion ist mit einem
-Standard-Theme nicht abbildbar. Das Custom-Theme nutzt gezielt Ghosts Mechanismen
-(Theme-Settings, dynamische Routen, strukturierte Inhalte), um Redakteur:innen volle
-Kontrolle ohne Code zu geben (Details §5).
+### 4.3 Webhooks → On-demand-Revalidation
+- In Ghost-Admin (Integration) Webhooks für `post.published`, `post.unpublished`, `post.edited`,
+  `page.*`, `tag.*`, `settings.changed` → Ziel `https://example.com/api/revalidate`.
+- Next.js-Route validiert ein **Shared Secret**, mappt Event → Pfad/Tag und ruft
+  `revalidatePath`/`revalidateTag`. So bleibt SSG aktuell ohne Vollrebuild.
 
----
+### 4.4 Members API (Hybrid/Client)
+- Newsletter-Anmeldung (Magic-Link) & optional Gated Content über Ghost Members.
+- Frontend nutzt den Members-Endpoint/`@tryghost/members-api`-Flow (Client-Komponente).
+- v1: mindestens Newsletter-Signup; Gated Content optional.
 
-## 4. Editierbarkeit „wie WordPress" – wie Ghost das leistet
-
-Ghost ist bewusst schlanker als WordPress. Die geforderte „alles ohne Code anpassbar"-Erfahrung
-wird über die **Kombination** dieser vier Ghost-Mechanismen erreicht:
-
-### 4.1 Theme-Custom-Settings (globale, getippte Felder)
-In `package.json` deklarierte Settings erscheinen im Admin unter **Design → Branding/Theme**
-als echte UI-Felder. Unterstützte Typen: `select`, `boolean`, `color`, `image`, `text`.
-Damit editierbar **ohne Code**:
-- Akzentfarbe(n), Hintergrundton, Hell/Dunkel-Default
-- Hero-Headline, Hero-Subtext, CTA-Beschriftungen & -Links
-- Sektionen ein-/ausblenden (Booleans), Reihenfolge-Varianten (Select)
-- Logos/Footer-Text, Social-Links
-
-> Hinweis/Grenze: Ghost erlaubt eine begrenzte Anzahl solcher Settings. Wir gruppieren sie
-> sinnvoll (Branding, Hero, Sektionen, Footer) und lagern „beliebig viele" Inhalte (z. B.
-> Feature-Karten) in strukturierte Inhalte aus (4.2).
-
-### 4.2 Strukturierte Inhalte über Posts/Pages + interne Tags
-Wiederholbare Elemente (Feature-Karten, Logos, Testimonials, Portfolio-Projekte) werden als
-**Beiträge mit internem Tag** gepflegt (z. B. `#feature`, `#logo`, `#project`). Das Theme
-durchläuft diese und rendert die Sektion. Redaktion = einfach einen neuen Beitrag mit dem Tag
-anlegen → Karte erscheint automatisch. Felder: Titel, Auszug, Feature-Bild, Link, Reihenfolge.
-
-### 4.3 Koenig-Editor (Block-/Card-basierte Seiten)
-Freie Inhaltsseiten (z. B. „Über mich", Blogposts) werden mit Ghosts visuellem Editor gebaut:
-Überschriften, Bilder, Galerien, Buttons, Callouts, Embeds, HTML-Cards, Snippets
-(wiederverwendbare Blöcke). Das deckt freie Layouts WordPress-artig ab.
-
-### 4.4 Dynamische Routen & Collections (`routes.yaml`)
-Steuert URL-Struktur, Sprach-Collections und welche Seite als Startseite dient – konfigurierbar
-ohne Theme-Code (siehe §7 und §8).
-
-**Fazit:** „Globales/Layout" → Theme-Settings · „Listen/Karten" → getaggte Inhalte ·
-„Freitext-Seiten" → Koenig-Editor · „Struktur/URLs" → routes.yaml. Zusammen ergibt das die
-geforderte codefreie Pflege.
+### 4.5 Grenze: keine echten Custom-Fields
+Ghost hat **keine** beliebigen Custom-Fields. Strukturierte, editierbare Sektionen lösen wir über
+**Konventionen** aus vorhandenen Feldern + interne Tags (siehe §6). Da wir das Frontend selbst
+bauen, definieren wir dieses Mapping frei und stabil.
 
 ---
 
 ## 5. Mehrsprachigkeit (DE + EN)
 
-Ghost hat **keine native Content-Übersetzung**. Empfohlener, Ghost-nativer Ansatz:
-
-### 5.1 Ansatz (empfohlen): Tag-Collections + Theme-Locales
-1. **UI-Strings** (Buttons, Labels, „Lesen", „Veröffentlicht am" …) über Ghosts
-   Übersetzungsdateien `locales/de.json` und `locales/en.json` mit dem `{{t}}`-Helper.
-2. **Inhalte** zweifach pflegen, getrennt über interne Tags `#de` / `#en`.
-3. **`routes.yaml`** legt Collections `/de/...` und `/en/...` an, gefiltert nach Tag.
-4. **Sprachumschalter** im Header (Theme-Partial), der zur jeweils anderen Sprachversion
-   verlinkt (Paarung via Slug-Konvention, z. B. `mein-post` ↔ `my-post`, oder via internem Tag).
-5. `<html lang>` und `hreflang`-Tags pro Sprache für SEO.
-
-**Vorteile:** kein externer Dienst, volle Datenhoheit, sauberes SEO.
-**Aufwand/Grenze:** Inhalte werden doppelt gepflegt; Paarung der Sprachversionen ist manuell/per Konvention.
-
-### 5.2 Alternative (geringerer Pflegeaufwand): Übersetzungs-Overlay
-Dienst wie Weglot/Crowdin-In-Context als JS-Overlay. Schneller, aber kostenpflichtig, weniger
-SEO-sauber und nicht „echt" zweisprachig im CMS. **Nicht empfohlen** für eine persönliche Seite,
-als Option dokumentiert.
-
-> **Entscheidung v1:** Ansatz 5.1 (Tag-Collections + Locales).
+- **Routing:** Next.js i18n unter `/de/...` und `/en/...` (Default-Redirect je nach
+  `Accept-Language`), mit `next-intl` (o. ä.) für **UI-Strings** (`messages/de.json`, `en.json`).
+- **Inhalte:** zweifach in Ghost gepflegt, getrennt über interne Tags `#de` / `#en`.
+  Content-API-Filter z. B. `tag:hash-de`.
+- **Paarung** der Sprachversionen via Slug-Konvention (`mein-post` ↔ `my-post`) oder gemeinsames
+  „link"-Tag; Sprachumschalter verlinkt auf das Pendant.
+- **SEO:** `<html lang>` korrekt, `hreflang`-Alternates DE/EN, sprachspezifische Sitemaps.
+- **Aufwand/Grenze:** Inhalte doppelt pflegen; Paarung per Konvention (bewusst akzeptiert).
+- **Alternative (nicht empfohlen):** Übersetzungs-Overlay (Weglot) – schneller, aber extern/kostenpflichtig.
 
 ---
 
-## 6. Sitemap & Seitenstruktur
+## 6. Content-Modell & Editierbarkeit „wie WordPress" (codefrei)
 
-```
-/                      Startseite (Antigravity-Stil, modulare Sektionen)  ──► default DE
-/en/                   Startseite EN
-/about, /en/about      Über mich
-/blog/, /en/blog/      Blog-Übersicht (Collection)
-/blog/<slug>           Einzelner Blogpost
-/projects/             (optional) Portfolio/Projekte (getaggte Inhalte)
-/contact, /en/contact  Kontakt
-/tag/<slug>            Tag-Archiv
-/author/<slug>         Autorenseite
-/rss/                  Feed
-/sitemap.xml, /robots.txt
-404                    Fehlerseite
-```
+Damit **jede** sichtbare Stelle im Ghost-Admin pflegbar ist, definieren wir ein klares Mapping
+zwischen Ghost-Inhalten und Next.js-Sektionen:
 
-### Globale Bausteine (auf allen Seiten, editierbar)
-- **Header:** Logo (Bild/Text), Hauptnavigation (Ghost-Navigation-Settings), Sprachumschalter, Theme-Toggle, primärer CTA.
-- **Footer:** Footer-Navigation, Social-Links, Copyright/Impressum-Links, Newsletter-Anmeldung (Ghost Members, optional).
+| Editierbar im Admin | Ghost-Mechanismus | Im Frontend gelesen über |
+|---|---|---|
+| Seitentitel, Beschreibung, **Akzentfarbe**, Logo, Icon, Cover, **Navigation** (primär/sekundär) | Ghost **Settings** (Design/General/Navigation) | Content API `settings` |
+| **Globale Texte & Toggles** (Hero-Headline/Subtext, CTA-Labels+Links, Sektion an/aus, Footer-Text) | Eine **Config-Page** mit JSON in einer Code-Card (Slug `site-config`) | Content API `pages/slug/site-config` → JSON parsen |
+| **Sektions-Überschrift/Intro** (z. B. „Features") | **Tag**-Felder (`name`, `description`, `feature_image`) | Content API `tags` |
+| **Wiederholbare Karten** (Features, Logos, Testimonials, Projekte) | **Posts/Pages mit internem Tag** (`#feature`, `#logo`, `#testimonial`, `#project`) + Felder `title`, `excerpt`/`custom_excerpt`, `feature_image`, `published` | Content API `posts?filter=tag:hash-feature` |
+| **Blogposts** | normale **Posts** (Koenig-Editor, Tags `#de`/`#en`) | Content API `posts` |
+| **Freie Seiten** (Über mich, Impressum, Datenschutz) | **Pages** (Koenig-Editor) | Content API `pages` |
+| **Per-Element-HTML/Embed** | Koenig **HTML-Card** / `codeinjection` | im HTML enthalten |
+
+> **Ergebnis:** Redaktion legt z. B. eine Feature-Karte an, indem sie einen Beitrag mit Tag
+> `#feature`, Titel, Auszug und Feature-Bild speichert → Karte erscheint automatisch. Hero-Text
+> ändern = Config-Page editieren. **Kein Code nötig.**
+
+### Config-Page-Schema (Beispiel, JSON in Code-Card)
+```json
+{
+  "hero": {
+    "eyebrow": "Persönlicher Blog",
+    "headline": "Ich baue Dinge mit Code & KI",
+    "subtitle": "Gedanken, Projekte und Experimente.",
+    "ctaPrimary": { "label": "Blog lesen", "url": "/de/blog" },
+    "ctaSecondary": { "label": "Über mich", "url": "/de/about" },
+    "visual": "https://cms.example.com/content/images/hero.png"
+  },
+  "sections": { "logos": true, "features": true, "showcase": true,
+                "testimonials": false, "newsletter": true },
+  "footer": { "text": "© 2026 …", "social": { "github": "…", "mastodon": "…" } }
+}
+```
+(Pro Sprache eine Config-Page: `site-config` / `site-config-en`.)
 
 ---
 
-## 7. Startseiten-Sektionen (modular, je editierbar)
+## 7. Sitemap
 
-Jede Sektion ist **ein-/ausblendbar** (Theme-Setting Boolean) und ihre Texte/Bilder/Links sind
-editierbar. Inhalts-Quelle pro Sektion in Klammern.
-
-| # | Sektion | Inhalt & editierbare Felder | Quelle |
-|---|---|---|---|
-| 1 | **Hero** | Headline, Subtext, CTA-1 (Text+Link), CTA-2 (Text+Link), Hintergrund-Visual/Bild, optionaler Badge/Eyebrow | Theme-Settings + Bild |
-| 2 | **Logo-/Skills-Leiste** | Überschrift + Liste von Logos/Tags mit Link | Getaggte Inhalte `#logo` |
-| 3 | **Feature-Highlights** | 3–6 Karten: Icon/Bild, Titel, Text, Link | Getaggte Inhalte `#feature` |
-| 4 | **Split-Showcase** | Abwechselnd Text/Visual-Blöcke (z. B. „Was ich mache") | Getaggte Inhalte `#showcase` |
-| 5 | **Neueste Blogposts** | Automatische Liste der letzten N Posts (Bild, Titel, Datum, Auszug) | Posts-Collection |
-| 6 | **Zitat/Testimonial** | Zitat, Person, Rolle, Avatar | Getaggte Inhalte `#testimonial` |
-| 7 | **Call-to-Action-Band** | Headline, Subtext, Button | Theme-Settings |
-| 8 | **Newsletter** (optional) | Überschrift, Text, Anmeldeformular | Ghost Members |
-
-> Reihenfolge v1 fest verdrahtet im Template, Sichtbarkeit pro Sektion per Toggle.
-> Optional v2: Reihenfolge per Select-Setting umstellbar.
+```
+/                         → Redirect auf /de oder /en (Accept-Language)
+/de , /en                 Startseite (modulare Sektionen, §8)
+/de/about , /en/about     Über mich (Ghost Page)
+/de/blog , /en/blog       Blog-Übersicht (Posts, paginiert)
+/de/blog/<slug>           Einzelner Post
+/de/projects              (optional) Projekte (#project)
+/de/tags/<slug>           Tag-Archiv
+/de/contact               Kontakt
+/sitemap.xml , /robots.txt , /rss.xml
+404 / error
+```
 
 ---
 
-## 8. Theme-Architektur (Custom Ghost Theme)
+## 8. Startseiten-Sektionen (modular, je editierbar)
 
-```
-theme/
-├─ package.json            # Name, Version, custom-Settings (Editierbarkeit!), engines
-├─ routes.yaml             # Routen, Sprach-Collections, Startseite
-├─ default.hbs            # Globales Layout (Header/Footer, <head>, lang/hreflang)
-├─ index.hbs             # Blog-Listing (Collection-Default)
-├─ home.hbs              # Startseite mit modularen Sektionen (§7)
-├─ post.hbs              # Einzelner Blogpost
-├─ page.hbs              # Statische Seite (About/Contact)
-├─ tag.hbs              # Tag-Archiv
-├─ author.hbs           # Autorenseite
-├─ error.hbs / error-404.hbs
-├─ partials/
-│  ├─ header.hbs        # Nav, Sprachswitch, Theme-Toggle, CTA
-│  ├─ footer.hbs
-│  ├─ sections/        # hero.hbs, features.hbs, showcase.hbs, cta.hbs, …
-│  ├─ card-post.hbs
-│  └─ lang-switcher.hbs
-├─ locales/
-│  ├─ de.json
-│  └─ en.json
-├─ assets/
-│  ├─ css/             # Design-Tokens + Komponenten (kompiliert)
-│  ├─ js/              # Theme-Toggle, dezente Animationen, Menü
-│  └─ images/
-└─ gulpfile.js / build  # Asset-Build (PostCSS/Tailwind o. ä.)
-```
+Jede Sektion ist über die Config-Page **ein-/ausblendbar**; Inhalte aus den in §6 genannten Quellen.
 
-- **Tooling:** Asset-Build (z. B. PostCSS/Tailwind oder schlankes CSS mit Custom Properties).
-  Antigravity-Look über **CSS-Variablen** (Tokens), die teils aus Theme-Settings gespeist werden
-  (z. B. Akzentfarbe als Inline-Variable im `<head>`), damit Farbe ohne Code editierbar ist.
-- **Validierung:** Theme muss `gscan` (Ghosts Theme-Validator) ohne Fehler bestehen.
-- **Standards:** Ghost-Helper (`{{ghost_head}}`, `{{ghost_foot}}`, `{{navigation}}`, `{{content}}`,
-  `{{#get}}`, `{{#foreach}}`, `{{t}}`, `{{@custom.*}}`).
+| # | Sektion | Quelle |
+|---|---|---|
+| 1 | **Hero** (Headline, Subtext, 2 CTAs, Visual, Eyebrow) | Config-Page `hero` |
+| 2 | **Logo-/Skills-Leiste** | Posts `#logo` |
+| 3 | **Feature-Highlights** (Karten) | Posts `#feature` + Tag-Header |
+| 4 | **Split-Showcase** (Text/Visual alternierend) | Posts `#showcase` |
+| 5 | **Neueste Blogposts** (letzte N) | Posts-Collection |
+| 6 | **Testimonial/Zitat** | Posts `#testimonial` |
+| 7 | **CTA-Band** | Config-Page |
+| 8 | **Newsletter** | Ghost Members |
 
-### Beispiel: editierbare Felder (`package.json` → `config.custom`)
-- `accent_color` (color), `background_style` (select: dark/light), `site_logo` (image)
-- `hero_headline` (text), `hero_subtitle` (text), `hero_cta_primary_label/url` (text)
-- `show_logos`, `show_features`, `show_testimonials`, `show_newsletter` (boolean)
-- `footer_text` (text)
+Globale Bausteine: **Header** (Logo, Navigation aus Settings, Sprachswitcher, Theme-Toggle, CTA),
+**Footer** (Navigation, Social, Rechtliches).
 
 ---
 
-## 9. Design-System / Tokens
+## 9. Frontend-Architektur (Next.js)
 
-| Token | Wert (Vorschlag, im Admin überschreibbar wo sinnvoll) |
+```
+frontend/
+├─ app/
+│  ├─ [lang]/                     # i18n-Segment (de|en)
+│  │  ├─ layout.tsx               # Header/Footer, <html lang>, Theme
+│  │  ├─ page.tsx                 # Startseite (Sektionen aus §8)
+│  │  ├─ about/page.tsx
+│  │  ├─ blog/page.tsx            # Liste (ISR)
+│  │  ├─ blog/[slug]/page.tsx     # Post (SSG/ISR, generateStaticParams)
+│  │  ├─ tags/[slug]/page.tsx
+│  │  └─ contact/page.tsx
+│  ├─ api/
+│  │  ├─ revalidate/route.ts      # Ghost-Webhook → revalidateTag/Path (Secret)
+│  │  └─ newsletter/route.ts      # Members-Signup-Proxy (optional)
+│  ├─ sitemap.ts , robots.ts , rss
+│  └─ globals.css                 # Design-Tokens (§10)
+├─ lib/ghost/
+│  ├─ content.ts                  # Content-API-Client + fetchAllPaginated
+│  ├─ admin.ts                    # Admin-API (nur server/Skripte)
+│  ├─ config.ts                   # Config-Page laden & validieren (zod)
+│  └─ types.ts
+├─ components/
+│  ├─ sections/                   # Hero, Logos, Features, Showcase, CTA, Newsletter …
+│  ├─ ui/                         # Button, Card, Badge, Nav, Footer, LangSwitcher, ThemeToggle
+│  └─ blog/                       # PostCard, PostBody (Ghost-HTML rendern)
+├─ messages/ de.json , en.json    # UI-Strings (next-intl)
+├─ middleware.ts                  # Locale-Redirect
+└─ next.config.ts
+```
+
+- **Rendering (Hybrid):**
+  - **SSG/ISR** für Startseite, Blogliste/-posts, Pages, Tag-Archive (`fetch`-Cache + Tags,
+    On-demand-Revalidate via Webhook).
+  - **Client/dynamisch** für Newsletter-Signup, Members-Status, **Suche**.
+- **Ghost-HTML rendern:** Post-/Page-`html` sicher einbetten; Ghost-spezifische Klassen
+  (`kg-*`) im CSS abbilden (Cards, Galerien, Buttons, Callouts).
+- **Bilder:** `next/image` mit erlaubtem Remote-Host (`cms.example.com`), responsive `srcset`.
+- **Suche:** Index aus Content API bauen (Build-Time JSON) + clientseitig (Fuse.js/Pagefind).
+- **Typsicherheit:** TypeScript + `zod`-Validierung der Config-Page & API-Responses.
+
+---
+
+## 10. Design-System / Tokens (CSS Custom Properties)
+
+| Token | Vorschlag |
 |---|---|
-| `--bg` | `#0A0A0B` (dark default) |
-| `--surface` | `#141417` (Karten) |
+| `--bg` | `#0A0A0B` |
+| `--surface` | `#141417` |
 | `--border` | `rgba(255,255,255,0.08)` |
-| `--text` | `#EDEDEF` |
-| `--text-muted` | `#A1A1AA` |
-| `--accent` | aus Theme-Setting (Default z. B. `#6E8BFF`) |
+| `--text` / `--text-muted` | `#EDEDEF` / `#A1A1AA` |
+| `--accent` | aus Ghost `settings.accent_color` (Default `#6E8BFF`) |
 | `--accent-gradient` | `linear-gradient(135deg, accent → violett/cyan)` |
-| `--radius` | `16px` (Karten), `999px` (Pills/Buttons) |
-| `--font-sans` | Inter / Geist / „Google-Sans-like", variabel |
-| `--space-section` | großzügige vertikale Sektionsabstände |
+| `--radius` | `16px` (Cards), `999px` (Pills) |
+| `--font-sans` | variable Sans (Inter/Geist) via `next/font` (self-hosted) |
 
-- **Komponenten:** Button (primär/sekundär/ghost), Card, Badge/Eyebrow, Nav, Footer,
-  Section-Wrapper, Tag-Pill, Avatar, Quote.
-- **Dark/Light:** Dunkel als Default; Light-Mode optional via Theme-Toggle (CSS-Variablen-Swap,
-  Präferenz in `localStorage`).
-- **Motion:** Subtile Fade/Slide-In beim Scrollen, Hover-Glow auf Karten; vollständig
-  deaktiviert bei `prefers-reduced-motion`.
+- Komponenten: Button (primär/sekundär/ghost), Card, Badge/Eyebrow, Nav, Footer, Section-Wrapper,
+  Tag-Pill, Avatar, Quote.
+- **Dark default**, Light-Mode optional (CSS-Var-Swap + `localStorage`), `prefers-reduced-motion` respektiert.
+- **Akzentfarbe** aus Ghost gespeist (Inline-CSS-Var im `<head>`) → im Admin änderbar, ohne Deploy.
 
 ---
 
-## 10. Redaktioneller Workflow (Beispiele, codefrei)
+## 11. Redaktioneller Workflow (codefrei, Beispiele)
 
-| Aufgabe | Schritte im Admin |
+| Aufgabe | Im Ghost-Admin |
 |---|---|
-| Hero-Text ändern | Design → Theme-Settings → `hero_headline` editieren → Speichern |
-| Sektion ausblenden | Design → Theme-Settings → `show_testimonials` = off |
-| Akzentfarbe ändern | Design → Theme-Settings → `accent_color` |
-| Feature-Karte hinzufügen | Beiträge → Neu → Inhalt + Feature-Bild → internes Tag `#feature` |
-| Blogpost schreiben | Beiträge → Neu → Koenig-Editor → Tag `#de` oder `#en` → Veröffentlichen |
+| Hero-Text/CTA ändern | Page `site-config` öffnen → JSON in Code-Card editieren → Veröffentlichen → Webhook revalidiert |
+| Sektion aus-/einblenden | `site-config` → `sections.testimonials = false` |
+| Akzentfarbe ändern | Einstellungen → Design → Brand-Color |
+| Feature-Karte anlegen | Beiträge → Neu → Titel/Auszug/Feature-Bild → internes Tag `#feature` |
+| Blogpost schreiben | Beiträge → Neu → Koenig → Tag `#de`/`#en` → Veröffentlichen |
 | Navigation ändern | Einstellungen → Navigation |
-| Neue Seite (z. B. Impressum) | Seiten → Neu → Inhalt → veröffentlichen |
-| Logo/Branding | Design → Branding |
+| Neue Seite (Impressum) | Seiten → Neu → veröffentlichen |
 
 ---
 
-## 11. Nicht-funktionale Anforderungen
+## 12. Nicht-funktionale Anforderungen
 
-- **Performance:** Lighthouse ≥ 90 (Performance/SEO/Best Practices/A11y) auf Mobil & Desktop;
-  LCP < 2,5 s; Bilder responsive (Ghosts `srcset`/`{{img_url}}`), Lazy-Loading; minimal JS.
-- **Accessibility:** WCAG 2.1 AA – Kontraste, Fokus-States, Tastaturnav, `alt`-Texte,
-  semantisches HTML, `prefers-reduced-motion`.
-- **SEO:** Saubere Meta/OpenGraph/Twitter-Cards (Ghost-nativ), `sitemap.xml`, `hreflang` DE/EN,
-  strukturierte Daten (JSON-LD via Ghost), sprechende URLs.
-- **Security:** TLS überall, aktuelle Ghost-Version, DB nicht öffentlich exponiert, Admin hinter
-  starkem Passwort/2FA, Secrets via `.env` (nicht im Repo), regelmäßige Updates.
-- **Datenschutz:** DSGVO – Impressum & Datenschutzerklärung (als Ghost-Pages), Cookie-/Analytics-
-  Hinweis falls Tracking, ggf. Plausible/umami statt GA (cookielos).
-- **Browser-Support:** aktuelle Versionen Chrome/Firefox/Safari/Edge; responsive ab ~320 px.
-- **Wartbarkeit:** Theme im Repo versioniert, dokumentiert, `gscan`-clean, reproduzierbares
-  Docker-Setup.
+- **Performance:** Lighthouse ≥ 90 (alle 4 Kategorien, Mobil); LCP < 2,5 s; minimales Client-JS
+  (Server Components default), `next/image`, `next/font`.
+- **A11y:** WCAG 2.1 AA – Kontraste, Fokus-States, Tastaturnav, `alt`, semantisches HTML, reduced-motion.
+- **SEO:** Metadata-API (Title/OG/Twitter), `hreflang` DE/EN, `sitemap.xml`, `rss.xml`, JSON-LD
+  (Article/Person), Canonicals.
+- **Security:** TLS überall; Content-Key nur server-side; Admin-API-Key & Webhook-Secret via `.env`
+  (nicht im Repo); Ghost-Admin hinter starkem Passwort/2FA; DB nicht öffentlich; aktuelle Versionen.
+- **Datenschutz (DSGVO):** Impressum & Datenschutz als Ghost-Pages; cookielose Analytics
+  (Ghost-nativ oder Plausible/umami); Member-Daten in Ghost.
+- **Resilienz:** Frontend fällt bei Ghost-Ausfall auf zuletzt gebauten Stand zurück (ISR-Cache).
+- **Wartbarkeit:** Monorepo, TypeScript, Lint/Format, dokumentiert, reproduzierbares Docker-Setup.
 
 ---
 
-## 12. Infrastruktur & Deployment
+## 13. Infrastruktur & Deployment
 
-- **`docker-compose.yml`:** Services `ghost`, `mysql`, `proxy` (Caddy/Nginx).
-- **Konfiguration:** via Environment-Variablen (`url`, `database__*`, `mail__*`) in `.env`
-  (Beispiel als `.env.example` im Repo, echte Secrets nicht committen).
-- **Mail:** Transaktionsmail (Member-Login/Newsletter) via SMTP-Provider (z. B. Mailgun/Postmark).
-- **Volumes:** `ghost_content` (inkl. Theme & Bilder), `mysql_data`.
-- **TLS:** Caddy automatisch oder Nginx+Certbot.
-- **CI/Deploy (optional):** Theme-Build + Upload via Ghost-Admin-API oder `ghost`-CLI; GitHub Action.
-- **Backups:** tägliches `mysqldump` + `content/`-Archiv, Aufbewahrung rotierend, Restore getestet.
-- **Monitoring (optional):** Uptime-Check + Logaggregation.
+- **`docker-compose.yml`** – Services:
+  - `ghost` (Ghost 6, `url=https://cms.example.com`, Mail-SMTP), `mysql` (8),
+    `frontend` (Next.js, Node 22, Prod-Build), `proxy` (Caddy, TLS + Routing beider Domains).
+- **Konfiguration:** `.env` (Beispiel `.env.example` im Repo): Ghost-URL, DB-Creds, SMTP,
+  `GHOST_CONTENT_API_KEY`, `GHOST_ADMIN_API_KEY`, `REVALIDATE_SECRET`. Secrets **nicht** committen.
+- **Volumes:** `ghost_content`, `mysql_data`.
+- **Mail:** SMTP-Provider (Mailgun/Postmark) für Member-Magic-Links/Newsletter.
+- **Build/Deploy:** Frontend-Image baut Next.js (`output: 'standalone'`); Deploy via Compose;
+  optional GitHub Action (Build + `docker compose up -d`).
+- **Webhooks einrichten:** nach erstem Start Ghost-Integration anlegen, Webhooks → `/api/revalidate`.
+- **Backups:** täglich `mysqldump` + `ghost_content`-Archiv; Restore getestet.
+- **Monitoring (optional):** Uptime-Check, Logs.
 
 ---
 
-## 13. Repository-Struktur (Ziel)
+## 14. Repository-Struktur (Ziel)
 
 ```
 webseite-ghost/
-├─ ANFORDERUNGEN.md            # dieses Dokument
+├─ ANFORDERUNGEN.md
 ├─ docker/
 │  ├─ docker-compose.yml
 │  ├─ .env.example
-│  └─ Caddyfile / nginx.conf
-├─ theme/                      # Custom Ghost Theme (siehe §8)
-├─ scripts/                    # backup.sh, deploy.sh
-└─ docs/                       # weitere Doku (Design-Tokens, Redaktions-Guide)
+│  └─ Caddyfile
+├─ frontend/                 # Next.js (App Router, TS)  – siehe §9
+├─ scripts/                  # seed.ts (Admin API), backup.sh, setup-webhooks.ts
+└─ docs/                     # Redaktions-Guide, API-Konventionen, Design-Tokens
 ```
 
 ---
 
-## 14. Akzeptanzkriterien (Definition of Done)
+## 15. Akzeptanzkriterien (Definition of Done)
 
-- [ ] Ghost läuft reproduzierbar via `docker compose up` (DB + Proxy + TLS).
-- [ ] Custom-Theme installiert, besteht `gscan` ohne Fehler/Warnungen.
-- [ ] Startseite zeigt alle Sektionen aus §7 im Antigravity-Look (dunkel, responsive).
-- [ ] **Jede** in §7 genannte Sektion ist im Admin ein-/ausblendbar und textlich editierbar – **ohne Code**.
-- [ ] Akzentfarbe, Hero-Texte, Logo, Navigation und Footer im Admin änderbar.
-- [ ] Blog funktioniert: Liste, Einzelpost, Tags, Autor, RSS.
-- [ ] DE/EN umschaltbar; `hreflang` und `lang`-Attribute korrekt; UI-Strings übersetzt.
-- [ ] Lighthouse ≥ 90 in allen vier Kategorien (Mobil).
-- [ ] Impressum & Datenschutz als Pages vorhanden.
-- [ ] Backup-Skript erzeugt wiederherstellbares DB+Content-Backup.
-- [ ] Redaktions-Kurzanleitung (`docs/`) vorhanden.
+- [ ] `docker compose up` startet Ghost 6 + MySQL + Next.js + Caddy (beide Domains via TLS).
+- [ ] Next.js liest Inhalte über die **Content API** (paginiert, ≤100/Seite respektiert).
+- [ ] Startseite zeigt alle Sektionen aus §8 im Antigravity-Look (dunkel, responsive).
+- [ ] **Jede** Sektion ist im Ghost-Admin ein-/ausblendbar und textlich editierbar – **ohne Code**
+      (Config-Page + getaggte Inhalte + Settings).
+- [ ] Ghost-**Webhook** → `/api/revalidate` aktualisiert betroffene Seiten ohne Vollrebuild.
+- [ ] Blog funktioniert: Liste (paginiert), Einzelpost (Ghost-HTML inkl. `kg-*`-Cards), Tags, Autor, RSS.
+- [ ] DE/EN umschaltbar; `hreflang`/`lang` korrekt; UI-Strings übersetzt.
+- [ ] Newsletter-Signup über Ghost **Members** funktioniert.
+- [ ] Lighthouse ≥ 90 (Mobil, alle Kategorien).
+- [ ] Impressum & Datenschutz als Pages; cookielose Analytics aktiv.
+- [ ] Backup-Skript erzeugt wiederherstellbares Backup; Redaktions-Guide in `docs/`.
 
 ---
 
-## 15. Roadmap / Meilensteine
+## 16. Roadmap / Meilensteine
 
 | M | Inhalt | Ergebnis |
 |---|---|---|
-| **M0** | Anforderungen (dieses Dokument) | Freigabe der Spec |
-| **M1** | Docker-Setup | Ghost lokal lauffähig, leeres Theme |
-| **M2** | Theme-Grundgerüst + Design-Tokens | Layout, Header/Footer, Dark-Theme |
-| **M3** | Startseiten-Sektionen + Editierbarkeit | §7 vollständig, Theme-Settings live |
-| **M4** | Blog + Pages + Tags + RSS | Redaktion möglich |
-| **M5** | Mehrsprachigkeit DE/EN | routes.yaml, locales, Switcher |
-| **M6** | Politur: Performance, A11y, SEO, Animation | Lighthouse ≥ 90 |
-| **M7** | Deployment, TLS, Backups, Doku | Produktiv + Redaktions-Guide |
+| **M0** | Anforderungen (dieses Dokument) | Freigabe |
+| **M1** | Docker-Compose: Ghost 6 + MySQL + Caddy | Ghost-Admin erreichbar |
+| **M2** | Next.js-Grundgerüst + Content-API-Client (Pagination, zod) | Daten lesbar, Tokens/Layout |
+| **M3** | Startseiten-Sektionen + Config-Page-Konvention | §8 vollständig, codefrei editierbar |
+| **M4** | Blog/Pages/Tags/RSS + Ghost-HTML-Rendering | Redaktion möglich |
+| **M5** | Webhooks → On-demand-Revalidation | ISR aktuell |
+| **M6** | Mehrsprachigkeit DE/EN (Routing, Locales, Switcher) | zweisprachig |
+| **M7** | Members/Newsletter + Suche | Hybrid-Features |
+| **M8** | Politur: Performance/A11y/SEO/Motion | Lighthouse ≥ 90 |
+| **M9** | Deployment, TLS, Backups, Doku | Produktiv + Guide |
 
 ---
 
-## 16. Offene Punkte / Risiken
+## 17. Offene Punkte / Risiken
 
-1. **Theme-Settings-Limit:** Ghost begrenzt Anzahl/Typ der Custom-Settings. Mitigation:
-   strukturierte Inhalte (Tags) für „beliebig viele" Elemente; Settings nur für globales Layout.
-2. **Mehrsprachigkeit ist Mehraufwand:** Inhalte doppelt pflegen; Paarung der Sprachversionen
-   per Konvention. Entscheidung 5.1 akzeptiert das bewusst.
-3. **„Sektionsreihenfolge frei verschieben"** ist in Ghost nur eingeschränkt möglich
-   (v1: Toggles; v2: Select-Varianten). Voll freies Drag&Drop wie WordPress-Pagebuilder ist
-   nicht Ghost-nativ – bewusst außerhalb v1.
-4. **Antigravity-Visuals (3D/Animation):** Aufwändige Hero-Animationen kosten Performance.
-   Mitigation: leichtgewichtige CSS/Canvas-Lösung statt schwerer Libraries.
-5. **Domain, Logo/Brand-Assets, finale Inhalte (Texte/Bilder)** werden vom Nutzer benötigt.
-
----
-
-## 17. Vom Nutzer benötigt (Inputs)
-
-- Domain-Name + DNS-Zugriff
-- Logo / Markenname / gewünschte Akzentfarbe(n)
-- SMTP-Zugang (für Member/Newsletter) – optional in v1
-- Startinhalte: Hero-Text, „Über mich", erste Blogposts, Impressum/Datenschutz-Daten
-- Präferenz Analytics (keines / Plausible / umami / GA)
+1. **Keine Custom-Fields in Ghost** → Config-Page-JSON & Tag-Konventionen. Mitigation: `zod`-Schema
+   + klare Redaktions-Doku, damit JSON nicht „kaputt" editiert wird (alternativ pro Feld eigene
+   Page/Tag-Felder, weniger fehleranfällig, mehr Klicks).
+2. **Webhook-Zuverlässigkeit:** verpasste Events → periodischer Fallback-Revalidate (Zeit-basiert)
+   zusätzlich zu Event-basiert.
+3. **Mehrsprachigkeit = doppelte Pflege**; Paarung per Konvention (akzeptiert).
+4. **Ghost-6-Pagination (max 100):** generischer Paginations-Helper Pflicht.
+5. **Aufwändige Antigravity-Animationen** vs. Performance → leichtgewichtige CSS/Canvas-Lösung.
+6. **Inputs nötig:** Domain(s)/DNS, Logo/Brand/Akzentfarbe, SMTP, Startinhalte, Analytics-Präferenz.
 
 ---
 
-*Nächster Schritt nach Freigabe: M1 (Docker-Setup) + M2 (Theme-Grundgerüst).*
+## 18. Vom Nutzer benötigt (Inputs)
+
+- Domains: `example.com` (Web) + `cms.example.com` (Ghost) + DNS-Zugriff
+- Logo / Markenname / Akzentfarbe(n)
+- SMTP-Zugang (Members/Newsletter)
+- Startinhalte: Hero-Texte, „Über mich", erste Blogposts, Impressum/Datenschutz
+- Analytics-Präferenz (Ghost-nativ / Plausible / umami / keines)
+
+---
+
+*Nächster Schritt nach Freigabe: M1 (Docker-Compose mit Ghost 6 + MySQL + Caddy) und
+M2 (Next.js-Grundgerüst + Content-API-Client).*
