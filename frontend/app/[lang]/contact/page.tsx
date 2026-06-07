@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getPageBySlug } from "@/lib/ghost/content";
+import { contentMetadata } from "@/lib/ghost/meta";
 
 export const revalidate = 3600;
 
@@ -10,8 +11,13 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const dict = await getDictionary(lang);
-  return { title: dict.nav.contact };
+  const slug = lang === "en" ? "contact-en" : "contact";
+  const page = await getPageBySlug(slug, "html");
+  if (!page) {
+    const dict = await getDictionary(lang);
+    return { title: dict.nav.contact };
+  }
+  return contentMetadata(page, { lang, path: "/contact", ogType: "website" });
 }
 
 export default async function ContactPage({

@@ -5,6 +5,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getAllPosts, getPostBySlug } from "@/lib/ghost/content";
 import { locales } from "@/i18n/dictionaries";
 import { abs } from "@/lib/site";
+import { contentMetadata } from "@/lib/ghost/meta";
 import JsonLd from "@/components/JsonLd";
 
 export const revalidate = 3600;
@@ -24,26 +25,12 @@ export async function generateMetadata({
   const { lang, slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
-  const canonical = abs(`/${lang}/blog/${post.slug}`);
-  return {
-    title: post.title,
-    description: post.custom_excerpt || post.excerpt || "",
-    alternates: {
-      canonical,
-      languages: {
-        de: abs(`/de/blog/${post.slug}`),
-        en: abs(`/en/blog/${post.slug}`),
-        "x-default": abs(`/de/blog/${post.slug}`),
-      },
-    },
-    openGraph: {
-      type: "article",
-      title: post.title,
-      description: post.custom_excerpt || post.excerpt || "",
-      images: post.feature_image ? [post.feature_image] : undefined,
-      publishedTime: post.published_at ?? undefined,
-    },
-  };
+  return contentMetadata(post, {
+    lang,
+    path: `/blog/${post.slug}`,
+    ogType: "article",
+    publishedTime: post.published_at,
+  });
 }
 
 export default async function PostPage({

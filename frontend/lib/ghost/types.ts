@@ -32,6 +32,16 @@ export interface GhostPost {
   published_at: string | null;
   updated_at: string | null;
   reading_time?: number;
+  // SEO / social meta (editable per post/page in Ghost admin)
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image: string | null;
+  og_title: string | null;
+  og_description: string | null;
+  twitter_image: string | null;
+  twitter_title: string | null;
+  twitter_description: string | null;
+  canonical_url: string | null;
   tags?: GhostTag[];
   authors?: GhostAuthor[];
   primary_author?: GhostAuthor;

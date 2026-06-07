@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { locales } from "@/i18n/dictionaries";
-import { getAllPosts, getPublicTags } from "@/lib/ghost/content";
+import { getAllPosts, getPublicTags, getContentPages } from "@/lib/ghost/content";
 
 export const revalidate = 3600;
 
@@ -33,6 +33,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: post.updated_at ?? post.published_at ?? undefined,
         changeFrequency: "monthly",
         priority: 0.7,
+      });
+    }
+  }
+
+  const pages = await getContentPages();
+  for (const lang of locales) {
+    for (const page of pages) {
+      entries.push({
+        url: `${SITE_URL}/${lang}/${page.slug}`,
+        lastModified: page.updated_at ?? page.published_at ?? undefined,
+        changeFrequency: "monthly",
+        priority: 0.4,
       });
     }
   }

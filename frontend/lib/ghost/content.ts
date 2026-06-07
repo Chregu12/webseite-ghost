@@ -182,6 +182,31 @@ export async function getPostsByInternalTag(
   );
 }
 
+// Pages handled by dedicated routes or used internally — excluded from the
+// generic /[lang]/[slug] page route and the sitemap.
+const RESERVED_PAGE_SLUGS = new Set([
+  "about",
+  "about-en",
+  "contact",
+  "contact-en",
+  "site-config",
+  "site-config-en",
+]);
+
+export function isReservedPageSlug(slug: string): boolean {
+  return RESERVED_PAGE_SLUGS.has(slug);
+}
+
+/** Public pages eligible for the generic page route (e.g. Impressum, Datenschutz). */
+export async function getContentPages(): Promise<GhostPage[]> {
+  const pages = await fetchAllPaginated<GhostPage>(
+    "pages",
+    { order: "published_at desc" },
+    ["pages"],
+  );
+  return pages.filter((p) => !isReservedPageSlug(p.slug));
+}
+
 export async function getTags(): Promise<GhostTag[]> {
   return fetchAllPaginated<GhostTag>("tags", { include: "count.posts" }, ["tags"]);
 }
