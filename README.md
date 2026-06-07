@@ -5,6 +5,17 @@ Persönliche Webseite & Blog im **Antigravity-Look**, gebaut als **Headless-Setu
 - **Ghost 6** (self-hosted, Docker) = CMS, Admin-Panel & APIs – die codefreie Redaktion.
 - **Next.js** (App Router, TypeScript) = selbst gebautes Frontend auf den Ghost-APIs.
 - Zweisprachig **DE/EN**, dunkles Design, **Ghost-native cookielose Analytics**.
+- **MCP-Server** (`mcp/`) = headless-Zugriff für KI-Agenten (lesen + schreiben).
+
+## Komponenten
+
+| Ordner | Zweck |
+|---|---|
+| `frontend/` | Next.js-Webseite (App Router, TS) |
+| `docker/` | Compose-Stack (Ghost 6 + MySQL + Caddy) |
+| `mcp/` | MCP-Server: Ghost für KI-Agenten ([mcp/README.md](./mcp/README.md)) |
+| `scripts/` | Seed, Backup, Restore |
+| `docs/` | Redaktions- & Deployment-Guide |
 
 Vollständige Spezifikation: **[ANFORDERUNGEN.md](./ANFORDERUNGEN.md)**.
 
