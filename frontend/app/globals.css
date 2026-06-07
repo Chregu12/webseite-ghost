@@ -300,6 +300,69 @@ h3 {
   color: var(--text-muted);
 }
 
+/* ---- Logo strip ---- */
+.logo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  opacity: 0.75;
+}
+
+/* ---- Showcase ---- */
+.showcase-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+.showcase-row.reverse .showcase-text {
+  order: 2;
+}
+@media (max-width: 720px) {
+  .showcase-row {
+    grid-template-columns: 1fr;
+  }
+  .showcase-row.reverse .showcase-text {
+    order: 0;
+  }
+}
+
+/* ---- Newsletter ---- */
+.newsletter-card {
+  text-align: center;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  background:
+    radial-gradient(
+      80% 120% at 50% 0%,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 70%
+    ),
+    var(--surface);
+}
+.newsletter-form {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.newsletter-input {
+  flex: 1 1 280px;
+  max-width: 360px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text);
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+}
+.newsletter-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 /* ---- Footer ---- */
 .site-footer {
   border-top: 1px solid var(--border);

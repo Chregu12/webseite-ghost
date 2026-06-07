@@ -35,6 +35,39 @@ const siteConfigSchema = z.object({
       newsletter: z.boolean().default(true),
     })
     .default({}),
+  // Editable headings/intros per section (shown above the tagged content).
+  content: z
+    .object({
+      logos: z
+        .object({ title: z.string().default("") })
+        .default({}),
+      features: z
+        .object({
+          title: z.string().default("Features"),
+          intro: z.string().default(""),
+        })
+        .default({}),
+      showcase: z
+        .object({
+          title: z.string().default(""),
+          intro: z.string().default(""),
+        })
+        .default({}),
+      testimonials: z
+        .object({
+          title: z.string().default(""),
+          intro: z.string().default(""),
+        })
+        .default({}),
+      newsletter: z
+        .object({
+          title: z.string().default("Newsletter"),
+          intro: z.string().default(""),
+          buttonLabel: z.string().default("Abonnieren"),
+        })
+        .default({}),
+    })
+    .default({}),
   footer: z
     .object({
       text: z.string().default(""),

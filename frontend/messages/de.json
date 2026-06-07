@@ -20,6 +20,11 @@
     "publishedOn": "Veröffentlicht am",
     "backToBlog": "Zurück zum Blog"
   },
+  "newsletter": {
+    "placeholder": "deine@email.de",
+    "success": "Fast geschafft – bitte bestätige die E-Mail in deinem Postfach.",
+    "error": "Etwas ist schiefgelaufen. Bitte versuche es später erneut."
+  },
   "footer": {
     "rights": "Alle Rechte vorbehalten."
   }

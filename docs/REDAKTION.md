@@ -27,6 +27,13 @@ Hero-Texte, CTA-Buttons, Footer und das Ein-/Ausblenden von Sektionen kommen aus
     "testimonials": false,
     "newsletter": true
   },
+  "content": {
+    "logos": { "title": "Womit ich arbeite" },
+    "features": { "title": "Was ich mache", "intro": "Kurzer Untertitel." },
+    "showcase": { "title": "Ausgewählte Projekte", "intro": "" },
+    "testimonials": { "title": "Stimmen", "intro": "" },
+    "newsletter": { "title": "Bleib auf dem Laufenden", "intro": "Neue Beiträge per Mail.", "buttonLabel": "Abonnieren" }
+  },
   "footer": {
     "text": "© 2026 Mein Name",
     "social": { "github": "https://github.com/…", "mastodon": "https://…" }

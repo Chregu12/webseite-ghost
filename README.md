@@ -68,6 +68,8 @@ einrichten (Events: `post.*`, `page.*`, `tag.*`, `settings.changed`).
 ## Status
 
 Umgesetzt: **M1** (Docker-Setup) · **M2** (Next.js-Grundgerüst + Content-API-Client, i18n,
-Startseite mit Hero + neueste Beiträge, Blog, Revalidate-Webhook).
-Als Nächstes: **M3** (alle Startseiten-Sektionen aus getaggten Inhalten). Siehe Roadmap in
+Blog, Revalidate-Webhook) · **M3** (alle modularen Startseiten-Sektionen aus getaggten
+Inhalten: Logos, Features, Showcase, Testimonials, neueste Beiträge + Newsletter via Ghost
+Members, je per `site-config` schaltbar).
+Als Nächstes: **M4** (Tag-Archive, Autorenseite, RSS, Sitemap) bzw. Feinschliff. Siehe Roadmap in
 [ANFORDERUNGEN.md](./ANFORDERUNGEN.md#16-roadmap--meilensteine).

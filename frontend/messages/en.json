@@ -20,6 +20,11 @@
     "publishedOn": "Published on",
     "backToBlog": "Back to blog"
   },
+  "newsletter": {
+    "placeholder": "you@email.com",
+    "success": "Almost there — please confirm the email in your inbox.",
+    "error": "Something went wrong. Please try again later."
+  },
   "footer": {
     "rights": "All rights reserved."
   }
