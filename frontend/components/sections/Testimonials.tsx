@@ -37,7 +37,7 @@ export default async function Testimonials({
                 {item.feature_image && (
                   <Image
                     src={item.feature_image}
-                    alt={item.title}
+                    alt=""
                     width={40}
                     height={40}
                     style={{ borderRadius: "999px" }}
