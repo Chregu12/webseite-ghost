@@ -6,7 +6,19 @@ export interface GhostAuthor {
   name: string;
   slug: string;
   profile_image: string | null;
+  cover_image?: string | null;
   bio: string | null;
+  website?: string | null;
+  location?: string | null;
+  twitter?: string | null;
+  facebook?: string | null;
+  threads?: string | null;
+  bluesky?: string | null;
+  mastodon?: string | null;
+  linkedin?: string | null;
+  instagram?: string | null;
+  youtube?: string | null;
+  url?: string | null;
 }
 
 export interface GhostTag {
@@ -59,6 +71,7 @@ export interface GhostSettings {
   cover_image: string | null;
   accent_color: string | null;
   locale: string | null;
+  comments_enabled?: "off" | "all" | "paid";
   navigation: { label: string; url: string }[];
   secondary_navigation: { label: string; url: string }[];
 }

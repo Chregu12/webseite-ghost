@@ -279,6 +279,23 @@ h3 {
   margin-top: 0.5rem;
 }
 
+.post-author-link {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.post-author-link:hover {
+  color: var(--accent);
+}
+
+/* ---- Author header ---- */
+.author-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
 /* ---- Article body (Ghost HTML) ---- */
 .prose {
   max-width: 68ch;

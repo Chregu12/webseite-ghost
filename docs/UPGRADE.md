@@ -60,6 +60,13 @@ node ../scripts/healthcheck.mjs
 > Tipp: Major-Upgrade zuerst lokal/Staging mit `docker compose up -d` + Healthcheck testen,
 > nicht direkt in Produktion.
 
+## Kommentare (comments-ui)
+
+Die nativen Ghost-Kommentare laden die `comments-ui` per CDN
+(`https://cdn.jsdelivr.net/ghost/comments-ui@latest/...`). Bei einem **Major-Upgrade**
+prüft der Healthcheck, dass die Kommentar-Sektion noch eingebunden wird. Falls nötig lässt sich
+die Quelle über `GHOST_COMMENTS_UI_URL` (Env) auf eine zur Ghost-Version passende Version pinnen.
+
 ## MySQL-Upgrade
 
 MySQL-Daten liegen im Volume `mysql_data`. Innerhalb von 8.x unkritisch (Backup genügt). Vor 8→9:

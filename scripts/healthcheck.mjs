@@ -64,15 +64,26 @@ async function main() {
   console.log(`Healthcheck: frontend=${SITE_URL} ghost=${GHOST_URL} api=${API_VERSION}\n`);
 
   let firstSlug = null;
+  let authorSlug = null;
+  let commentsEnabled = null;
 
   // ---- Ghost Content API contract (optional, needs key) ----
   if (KEY) {
     await check("Ghost: settings reachable + required keys", async () => {
       const json = await ghostJson("/settings/");
       const s = json.settings ?? {};
+      commentsEnabled = s.comments_enabled ?? null;
       const missing = REQUIRED_SETTINGS_KEYS.filter((k) => !(k in s));
       if (missing.length) throw new Error(`missing settings keys: ${missing.join(", ")}`);
       return `title="${s.title}"`;
+    });
+
+    await check("Ghost: authors endpoint returns an author", async () => {
+      const json = await ghostJson("/authors/?limit=1");
+      const a = json.authors?.[0];
+      if (!a?.slug) throw new Error("no author");
+      authorSlug = a.slug;
+      return `slug="${a.slug}"`;
     });
 
     await check("Ghost: post shape has required fields", async () => {
@@ -166,6 +177,37 @@ async function main() {
     const { status } = await get(`${SITE_URL}/de/site-config`);
     if (status !== 404) throw new Error(`expected 404, got ${status}`);
   });
+
+  // Derive an author slug from the post page if the API wasn't available.
+  if (!authorSlug && firstSlug) {
+    const { text } = await get(`${SITE_URL}/de/blog/${firstSlug}`);
+    authorSlug = text.match(/\/de\/author\/([a-z0-9-]+)/i)?.[1] ?? null;
+  }
+
+  await check("Frontend: author page renders with Person JSON-LD", async () => {
+    if (!authorSlug) throw new Error("no author slug available");
+    const { status, text } = await get(`${SITE_URL}/de/author/${authorSlug}`);
+    if (status !== 200) throw new Error(`HTTP ${status}`);
+    if (!text.includes('"Person"')) throw new Error("no Person schema");
+    return `slug="${authorSlug}"`;
+  });
+
+  await check("Frontend: legacy /feed redirects to RSS", async () => {
+    const res = await fetch(`${SITE_URL}/feed`, { redirect: "manual" });
+    if (res.status < 300 || res.status >= 400)
+      throw new Error(`expected 3xx, got ${res.status}`);
+    const loc = res.headers.get("location") ?? "";
+    if (!loc.includes("rss")) throw new Error(`unexpected location: ${loc}`);
+  });
+
+  if (commentsEnabled && commentsEnabled !== "off") {
+    await check("Frontend: post page mounts comments (members enabled)", async () => {
+      if (!firstSlug) throw new Error("no post slug");
+      const { text } = await get(`${SITE_URL}/de/blog/${firstSlug}`);
+      if (!text.includes('aria-label="Comments"'))
+        throw new Error("comments section not rendered");
+    });
+  }
 
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);

@@ -33,6 +33,7 @@ const siteConfigSchema = z.object({
       latestPosts: z.boolean().default(true),
       testimonials: z.boolean().default(false),
       newsletter: z.boolean().default(true),
+      comments: z.boolean().default(true),
     })
     .default({}),
   // Editable headings/intros per section (shown above the tagged content).

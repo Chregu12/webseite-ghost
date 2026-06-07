@@ -3,11 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getAllPosts, getPostBySlug, getSettings } from "@/lib/ghost/content";
+import { getSiteConfig } from "@/lib/ghost/config";
 import { locales } from "@/i18n/dictionaries";
 import { abs } from "@/lib/site";
 import { contentMetadata } from "@/lib/ghost/meta";
 import { blogPostingLd, breadcrumbLd } from "@/lib/jsonld";
 import JsonLd from "@/components/JsonLd";
+import Comments from "@/components/Comments";
 
 export const revalidate = 3600;
 
@@ -44,7 +46,22 @@ export default async function PostPage({
   const post = await getPostBySlug(slug);
   if (!post) notFound();
   const settings = await getSettings();
+  const config = await getSiteConfig(lang);
   const siteName = settings?.title ?? "Mein Blog";
+  const author = post.primary_author;
+
+  const ghostPublicUrl = (
+    process.env.GHOST_PUBLIC_URL ??
+    process.env.GHOST_URL ??
+    "http://localhost:2368"
+  ).replace(/\/$/, "");
+  const commentsUrl =
+    process.env.GHOST_COMMENTS_UI_URL ??
+    "https://cdn.jsdelivr.net/ghost/comments-ui@latest/umd/comments-ui.min.js";
+  const showComments =
+    config.sections.comments &&
+    settings?.comments_enabled !== "off" &&
+    !!process.env.GHOST_CONTENT_API_KEY;
 
   const date = post.published_at
     ? new Date(post.published_at).toLocaleDateString(lang, {
@@ -72,11 +89,18 @@ export default async function PostPage({
         <h1 className="section-title" style={{ marginTop: "1rem", maxWidth: "20ch" }}>
           {post.title}
         </h1>
-        {date && (
-          <div className="post-meta">
-            {dict.blog.publishedOn} {date}
-          </div>
-        )}
+        <div className="post-meta">
+          {author && (
+            <>
+              {dict.blog.by}{" "}
+              <Link href={`/${lang}/author/${author.slug}`} className="post-author-link">
+                {author.name}
+              </Link>
+              {date ? " · " : ""}
+            </>
+          )}
+          {date && `${dict.blog.publishedOn} ${date}`}
+        </div>
       </div>
       <div className="container" style={{ marginTop: "2.5rem" }}>
         <div
@@ -84,6 +108,15 @@ export default async function PostPage({
           dangerouslySetInnerHTML={{ __html: post.html ?? "" }}
         />
       </div>
+      {showComments && (
+        <Comments
+          ghostUrl={ghostPublicUrl}
+          apiKey={process.env.GHOST_CONTENT_API_KEY ?? ""}
+          postId={post.id}
+          title={post.title}
+          scriptUrl={commentsUrl}
+        />
+      )}
     </article>
   );
 }

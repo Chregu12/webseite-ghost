@@ -1,0 +1,5 @@
+[
+  { "source": "/feed", "destination": "/de/rss.xml", "permanent": true },
+  { "source": "/rss", "destination": "/de/rss.xml", "permanent": true },
+  { "source": "/blog", "destination": "/de/blog", "permanent": false }
+]

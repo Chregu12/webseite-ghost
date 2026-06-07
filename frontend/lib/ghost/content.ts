@@ -3,6 +3,7 @@ import type {
   GhostPage,
   GhostSettings,
   GhostTag,
+  GhostAuthor,
   GhostPagination,
 } from "./types";
 
@@ -208,6 +209,36 @@ export async function getContentPages(): Promise<GhostPage[]> {
     ["pages"],
   );
   return pages.filter((p) => !isReservedPageSlug(p.slug));
+}
+
+// ---- Authors ---------------------------------------------------------------
+
+export async function getAuthors(): Promise<GhostAuthor[]> {
+  return fetchAllPaginated<GhostAuthor>("authors", { include: "count.posts" }, ["authors"]);
+}
+
+export async function getAuthorBySlug(slug: string): Promise<GhostAuthor | null> {
+  const res = await ghostFetch<GhostAuthor>(
+    `authors/slug/${encodeURIComponent(slug)}`,
+    { include: "count.posts" },
+    ["authors", `author:${slug}`],
+  );
+  return res?.data?.[0] ?? null;
+}
+
+/** Blog posts by an author (excludes section posts). */
+export async function getPostsByAuthor(
+  slug: string,
+  lang?: string,
+): Promise<GhostPost[]> {
+  const parts = [`author:${slug}`];
+  if (lang) parts.push(`tag:hash-${lang}`);
+  parts.push(EXCLUDE_SECTIONS);
+  return fetchAllPaginated<GhostPost>(
+    "posts",
+    { ...POST_FIELDS_INCLUDE, filter: parts.join("+"), order: "published_at desc" },
+    ["posts", `author:${slug}`],
+  );
 }
 
 export async function getTags(): Promise<GhostTag[]> {

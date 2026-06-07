@@ -1,4 +1,4 @@
-import type { GhostPost } from "./ghost/types";
+import type { GhostPost, GhostAuthor } from "./ghost/types";
 import { abs } from "./site";
 
 // Structured data (schema.org) builders. Rich, accurate JSON-LD helps AI search
@@ -74,6 +74,29 @@ export function blogPostingLd(
     keywords: keywords.length ? keywords : undefined,
     mainEntityOfPage: url,
     url,
+  };
+}
+
+export function personLd(author: GhostAuthor, opts: { url: string }) {
+  const sameAs = [
+    author.website,
+    author.twitter,
+    author.facebook,
+    author.mastodon,
+    author.bluesky,
+    author.threads,
+    author.linkedin,
+    author.instagram,
+    author.youtube,
+  ].filter((v): v is string => !!v && /^https?:\/\//.test(v));
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: author.name,
+    url: opts.url,
+    ...(author.profile_image ? { image: author.profile_image } : {}),
+    ...(author.bio ? { description: author.bio } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
   };
 }
 

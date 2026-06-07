@@ -25,7 +25,9 @@
     "title": "Blog",
     "empty": "No posts published yet.",
     "publishedOn": "Published on",
-    "backToBlog": "Back to blog"
+    "backToBlog": "Back to blog",
+    "by": "by",
+    "postsBy": "Posts by"
   },
   "newsletter": {
     "placeholder": "you@email.com",
