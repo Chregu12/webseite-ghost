@@ -71,6 +71,10 @@ docker compose --profile web up -d --build   # ghost + mysql + frontend + caddy 
 Danach in Ghost einen **Webhook** auf `https://<SITE_DOMAIN>/api/revalidate?secret=<REVALIDATE_SECRET>`
 einrichten (Events: `post.*`, `page.*`, `tag.*`, `settings.changed`).
 
+Vollständige Anleitung (DNS, TLS, Keys, Webhook, Backups, Updates):
+**[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)**. Backups: `scripts/backup.sh` (Cron), Restore:
+`scripts/restore.sh`.
+
 ## Status
 
 Umgesetzt: **M1** (Docker-Setup) · **M2** (Next.js-Grundgerüst + Content-API-Client, i18n,
