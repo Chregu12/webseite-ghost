@@ -6,7 +6,17 @@ export default function Hero({ config }: { config: SiteConfig }) {
   const { hero } = config;
   return (
     <section className="hero">
-      <div className="container">
+      {!hero.visual && (
+        <div className="hero-rings" aria-hidden="true">
+          <span className="ring" />
+          <span className="ring" />
+          <span className="ring" />
+          <span className="ring" />
+          <span className="orbit" />
+          <span className="orbit reverse" />
+        </div>
+      )}
+      <div className="container hero-content">
         {hero.eyebrow && <span className="eyebrow">{hero.eyebrow}</span>}
         <h1 style={{ marginTop: hero.eyebrow ? "1.25rem" : 0 }}>{hero.headline}</h1>
         {hero.subtitle && <p className="subtitle">{hero.subtitle}</p>}

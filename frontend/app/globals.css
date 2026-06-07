@@ -33,6 +33,15 @@
   --text-muted: #55555f;
 }
 
+/* Derive the gradient's second stop from the admin accent color so a single
+   brand color (Ghost → Design) drives the whole theme harmoniously. Falls back
+   to the fixed violet above where relative color syntax isn't supported. */
+@supports (color: oklch(from white l c h)) {
+  body {
+    --accent-2: oklch(from var(--accent) l c calc(h + 38));
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -219,27 +228,94 @@ h3 {
 .hero {
   position: relative;
   overflow: hidden;
-  padding-block: clamp(5rem, 14vw, 9rem);
+  padding-block: clamp(6rem, 16vw, 11rem);
   text-align: center;
 }
 .hero::before {
   content: "";
   position: absolute;
   inset: -40% 0 auto 0;
-  height: 80%;
+  height: 90%;
   background: radial-gradient(
-    60% 60% at 50% 0%,
-    color-mix(in srgb, var(--accent) 25%, transparent),
+    55% 55% at 50% 0%,
+    color-mix(in srgb, var(--accent) 34%, transparent),
     transparent 70%
   );
   pointer-events: none;
-  filter: blur(20px);
+  filter: blur(24px);
+}
+
+/* ---- Antigravity-style animated ring/particle hero visual ---- */
+.hero-rings {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 0;
+  mask-image: radial-gradient(closest-side, #000 60%, transparent 100%);
+}
+.hero-rings .ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  aspect-ratio: 1;
+  animation: ringPulse 6s ease-in-out infinite;
+}
+.hero-rings .ring:nth-child(1) { width: min(22rem, 70vw); opacity: 0.9; }
+.hero-rings .ring:nth-child(2) { width: min(34rem, 92vw); opacity: 0.65; animation-delay: 0.6s; }
+.hero-rings .ring:nth-child(3) { width: min(48rem, 120vw); opacity: 0.4; animation-delay: 1.2s; }
+.hero-rings .ring:nth-child(4) { width: min(64rem, 150vw); opacity: 0.25; animation-delay: 1.8s; }
+.hero-rings .orbit {
+  position: absolute;
+  width: min(48rem, 120vw);
+  aspect-ratio: 1;
+  animation: spin 22s linear infinite;
+}
+.hero-rings .orbit::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 18px 4px var(--accent);
+}
+.hero-rings .orbit.reverse {
+  width: min(34rem, 92vw);
+  animation-duration: 16s;
+  animation-direction: reverse;
+}
+.hero-rings .orbit.reverse::before {
+  background: var(--accent-2);
+  box-shadow: 0 0 16px 3px var(--accent-2);
+}
+@keyframes ringPulse {
+  0%, 100% { opacity: var(--o, 0.5); transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  animation: heroIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
 }
 .hero h1 {
-  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-size: clamp(2.6rem, 7.5vw, 5rem);
   font-weight: 800;
+  letter-spacing: -0.03em;
   max-width: 16ch;
   margin-inline: auto;
+  text-wrap: balance;
 }
 .hero .subtitle {
   margin-top: 1.25rem;
@@ -247,15 +323,18 @@ h3 {
   color: var(--text-muted);
   max-width: 56ch;
   margin-inline: auto;
+  text-wrap: pretty;
 }
 .hero .cta-row {
-  margin-top: 2rem;
+  margin-top: 2.25rem;
   display: flex;
   gap: 0.9rem;
   justify-content: center;
   flex-wrap: wrap;
 }
 .hero-visual {
+  position: relative;
+  z-index: 1;
   margin-top: 3rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
