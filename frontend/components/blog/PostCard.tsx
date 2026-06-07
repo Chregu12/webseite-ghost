@@ -21,6 +21,7 @@ export default function PostCard({ post, lang }: { post: GhostPost; lang: string
           alt={post.feature_image_alt || post.title}
           width={640}
           height={360}
+          sizes="(max-width: 720px) 100vw, 360px"
         />
       )}
       <h3>{post.title}</h3>

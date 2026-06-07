@@ -18,12 +18,14 @@ export async function generateMetadata({
 }: {
   params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { lang, slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
+  const canonical = abs(`/${lang}/blog/${post.slug}`);
   return {
     title: post.title,
     description: post.custom_excerpt || post.excerpt || "",
+    alternates: { canonical, languages: { "x-default": canonical } },
     openGraph: {
       type: "article",
       title: post.title,

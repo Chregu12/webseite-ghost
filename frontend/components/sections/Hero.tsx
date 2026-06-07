@@ -30,6 +30,7 @@ export default function Hero({ config }: { config: SiteConfig }) {
               width={1120}
               height={630}
               priority
+              sizes="(max-width: 1120px) 100vw, 1120px"
               style={{ width: "100%", height: "auto" }}
             />
           </div>

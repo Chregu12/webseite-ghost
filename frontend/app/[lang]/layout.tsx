@@ -35,9 +35,12 @@ export async function generateMetadata({
     },
     description: settings?.description ?? "",
     alternates: {
-      languages: { de: "/de", en: "/en" },
+      languages: { de: "/de", en: "/en", "x-default": "/de" },
       types: { "application/rss+xml": `/${lang}/rss.xml` },
     },
+    icons: settings?.icon
+      ? { icon: settings.icon, apple: settings.icon }
+      : undefined,
     openGraph: {
       type: "website",
       locale: lang,
@@ -82,8 +85,11 @@ export default async function LangLayout({
             inLanguage: lang,
           }}
         />
+        <a href="#main" className="skip-link">
+          {dict.actions.skipToContent}
+        </a>
         <Header lang={lang} settings={settings} dict={dict} />
-        <main>{children}</main>
+        <main id="main">{children}</main>
         <Footer config={config} dict={dict} />
       </body>
     </html>

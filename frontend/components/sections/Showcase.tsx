@@ -40,6 +40,7 @@ export default async function Showcase({
                     alt={item.feature_image_alt || item.title}
                     width={560}
                     height={360}
+                    sizes="(max-width: 720px) 100vw, 560px"
                     style={{ width: "100%", height: "auto", borderRadius: "var(--radius)" }}
                   />
                 </div>
