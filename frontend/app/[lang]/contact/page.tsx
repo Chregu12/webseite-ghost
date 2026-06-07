@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getPageBySlug } from "@/lib/ghost/content";
 import { contentMetadata } from "@/lib/ghost/meta";
+import ContactForm from "@/components/ContactForm";
 
 export const revalidate = 3600;
 
@@ -36,17 +37,16 @@ export default async function ContactPage({
     <section className="section">
       <div className="container">
         <h1 className="section-title">{page?.title ?? dict.nav.contact}</h1>
-        {page?.html ? (
+        {page?.html && (
           <div
             className="prose"
             style={{ marginTop: "2rem" }}
             dangerouslySetInnerHTML={{ __html: page.html }}
           />
-        ) : (
-          <p className="muted" style={{ marginTop: "1.5rem" }}>
-            …
-          </p>
         )}
+        <div style={{ marginTop: "2rem" }}>
+          <ContactForm labels={dict.contact} />
+        </div>
       </div>
     </section>
   );

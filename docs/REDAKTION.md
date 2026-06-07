@@ -112,3 +112,15 @@ node scripts/seed.mjs
 ```
 
 Das Skript ist **idempotent** (findet bestehende Inhalte per Slug und aktualisiert sie).
+
+## 8. Entwurfs-Vorschau, Kontaktformular, ähnliche Beiträge
+
+- **Entwurf vorab ansehen (Draft Preview):** Einen unveröffentlichten Beitrag mit dieser URL
+  öffnen (Slug aus den Beitrags-Einstellungen):
+  `https://<SITE_DOMAIN>/api/preview?secret=<PREVIEW_SECRET>&slug=<slug>&lang=de`
+  → zeigt den Entwurf mit Banner; „Vorschau beenden" beendet sie. (`PREVIEW_SECRET` +
+  `GHOST_ADMIN_API_KEY` müssen gesetzt sein.)
+- **Kontaktformular:** Auf der `contact`-Seite wird automatisch ein Formular unter dem
+  Seiteninhalt gerendert. Es versendet per SMTP an **`CONTACT_TO`** (siehe `docker/.env`).
+- **Ähnliche Beiträge:** erscheinen automatisch unter jedem Beitrag (gleiches Haupt-Tag,
+  sonst neueste Beiträge) — nichts zu pflegen.

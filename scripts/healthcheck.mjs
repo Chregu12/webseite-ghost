@@ -209,6 +209,27 @@ async function main() {
     });
   }
 
+  await check("Frontend: post shows related posts", async () => {
+    if (!firstSlug) throw new Error("no post slug");
+    const { text } = await get(`${SITE_URL}/de/blog/${firstSlug}`);
+    if (!text.includes("Ähnliche Beiträge"))
+      throw new Error("related section not rendered");
+  });
+
+  await check("Frontend: contact endpoint validates input (400)", async () => {
+    const res = await fetch(`${SITE_URL}/api/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    if (res.status !== 400) throw new Error(`expected 400, got ${res.status}`);
+  });
+
+  await check("Frontend: preview endpoint is protected (401)", async () => {
+    const res = await fetch(`${SITE_URL}/api/preview?slug=x`, { redirect: "manual" });
+    if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
+  });
+
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);

@@ -151,6 +151,28 @@ export async function getAllPosts(lang?: string): Promise<GhostPost[]> {
   );
 }
 
+/** Posts related to `post` by primary tag (falls back to latest), excluding it. */
+export async function getRelatedPosts(
+  post: GhostPost,
+  lang?: string,
+  limit = 3,
+): Promise<GhostPost[]> {
+  const tagSlug = post.primary_tag?.slug;
+  if (tagSlug) {
+    const parts = [`tag:${tagSlug}`, `id:-${post.id}`];
+    if (lang) parts.push(`tag:hash-${lang}`);
+    parts.push(EXCLUDE_SECTIONS);
+    const related = await fetchAllPaginated<GhostPost>(
+      "posts",
+      { ...POST_FIELDS_INCLUDE, filter: parts.join("+"), order: "published_at desc" },
+      ["posts"],
+    );
+    if (related.length) return related.slice(0, limit);
+  }
+  const latest = await getPosts({ lang, limit: limit + 1 });
+  return latest.filter((p) => p.id !== post.id).slice(0, limit);
+}
+
 export async function getPostBySlug(slug: string): Promise<GhostPost | null> {
   const res = await ghostFetch<GhostPost>(
     `posts/slug/${encodeURIComponent(slug)}`,

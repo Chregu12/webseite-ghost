@@ -78,7 +78,16 @@ services:
       GHOST_IMAGE_DOMAIN: ${CMS_DOMAIN}
       GHOST_CONTENT_API_KEY: ${GHOST_CONTENT_API_KEY}
       GHOST_ADMIN_API_KEY: ${GHOST_ADMIN_API_KEY:-}
+      GHOST_API_VERSION: ${GHOST_API_VERSION:-v6.0}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:-}
+      # Contact form (reuses the SMTP creds below)
+      CONTACT_TO: ${CONTACT_TO:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
       NODE_ENV: production
     networks: [internal]

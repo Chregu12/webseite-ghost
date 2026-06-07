@@ -27,7 +27,20 @@
     "publishedOn": "Veröffentlicht am",
     "backToBlog": "Zurück zum Blog",
     "by": "von",
-    "postsBy": "Beiträge von"
+    "postsBy": "Beiträge von",
+    "related": "Ähnliche Beiträge"
+  },
+  "contact": {
+    "name": "Name",
+    "email": "E-Mail",
+    "message": "Nachricht",
+    "send": "Senden",
+    "success": "Danke! Deine Nachricht wurde gesendet.",
+    "error": "Senden fehlgeschlagen. Bitte später erneut versuchen."
+  },
+  "preview": {
+    "banner": "Vorschau-Modus (Entwurf)",
+    "exit": "Vorschau beenden"
   },
   "newsletter": {
     "placeholder": "deine@email.de",

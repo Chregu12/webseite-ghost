@@ -27,7 +27,20 @@
     "publishedOn": "Published on",
     "backToBlog": "Back to blog",
     "by": "by",
-    "postsBy": "Posts by"
+    "postsBy": "Posts by",
+    "related": "Related posts"
+  },
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "success": "Thanks! Your message has been sent.",
+    "error": "Sending failed. Please try again later."
+  },
+  "preview": {
+    "banner": "Preview mode (draft)",
+    "exit": "Exit preview"
   },
   "newsletter": {
     "placeholder": "you@email.com",

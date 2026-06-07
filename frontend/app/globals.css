@@ -402,6 +402,35 @@ h3 {
   outline-offset: 1px;
 }
 
+/* ---- Contact form ---- */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 520px;
+}
+.contact-form .newsletter-input {
+  max-width: 100%;
+  width: 100%;
+}
+.contact-form .btn {
+  align-self: flex-start;
+}
+
+/* ---- Preview banner ---- */
+.preview-banner {
+  background: var(--accent-gradient);
+  color: #fff;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.preview-banner a {
+  text-decoration: underline;
+  margin-left: 0.75rem;
+}
+
 /* ---- Footer ---- */
 .site-footer {
   border-top: 1px solid var(--border);
