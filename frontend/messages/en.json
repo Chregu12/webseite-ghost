@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "blog": "Blog",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "actions": {
+    "readMore": "Read more",
+    "subscribe": "Subscribe",
+    "switchLanguage": "DE",
+    "toggleTheme": "Toggle theme"
+  },
+  "home": {
+    "latestPostsTitle": "Latest posts",
+    "latestPostsIntro": "Thoughts, projects and experiments."
+  },
+  "blog": {
+    "title": "Blog",
+    "empty": "No posts published yet.",
+    "publishedOn": "Published on",
+    "backToBlog": "Back to blog"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}

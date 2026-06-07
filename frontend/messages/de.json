@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "blog": "Blog",
+    "about": "Über mich",
+    "contact": "Kontakt"
+  },
+  "actions": {
+    "readMore": "Weiterlesen",
+    "subscribe": "Abonnieren",
+    "switchLanguage": "EN",
+    "toggleTheme": "Theme wechseln"
+  },
+  "home": {
+    "latestPostsTitle": "Neueste Beiträge",
+    "latestPostsIntro": "Gedanken, Projekte und Experimente."
+  },
+  "blog": {
+    "title": "Blog",
+    "empty": "Noch keine Beiträge veröffentlicht.",
+    "publishedOn": "Veröffentlicht am",
+    "backToBlog": "Zurück zum Blog"
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten."
+  }
+}

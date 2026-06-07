@@ -1,0 +1,12 @@
+# Reverse proxy with automatic HTTPS (Let's Encrypt).
+# Domains are injected from the environment (.env -> compose).
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy frontend:3000
+}
+
+{$CMS_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy ghost:2368
+}
