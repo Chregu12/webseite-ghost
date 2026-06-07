@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n/dictionaries";
-import { getAllPosts, getPostBySlug } from "@/lib/ghost/content";
+import { getAllPosts, getPostBySlug, getSettings } from "@/lib/ghost/content";
 import { locales } from "@/i18n/dictionaries";
 import { abs } from "@/lib/site";
 import { contentMetadata } from "@/lib/ghost/meta";
+import { blogPostingLd, breadcrumbLd } from "@/lib/jsonld";
 import JsonLd from "@/components/JsonLd";
 
 export const revalidate = 3600;
@@ -42,6 +43,8 @@ export default async function PostPage({
   const dict = await getDictionary(lang);
   const post = await getPostBySlug(slug);
   if (!post) notFound();
+  const settings = await getSettings();
+  const siteName = settings?.title ?? "Mein Blog";
 
   const date = post.published_at
     ? new Date(post.published_at).toLocaleDateString(lang, {
@@ -51,23 +54,17 @@ export default async function PostPage({
       })
     : "";
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    image: post.feature_image ? [post.feature_image] : undefined,
-    datePublished: post.published_at ?? undefined,
-    dateModified: post.updated_at ?? post.published_at ?? undefined,
-    author: post.primary_author
-      ? { "@type": "Person", name: post.primary_author.name }
-      : undefined,
-    mainEntityOfPage: abs(`/${lang}/blog/${post.slug}`),
-    url: abs(`/${lang}/blog/${post.slug}`),
-  };
+  const articleLd = blogPostingLd(post, { lang, siteName, logo: settings?.logo });
+  const crumbsLd = breadcrumbLd([
+    { name: siteName, url: abs(`/${lang}`) },
+    { name: dict.blog.title, url: abs(`/${lang}/blog`) },
+    { name: post.title, url: abs(`/${lang}/blog/${post.slug}`) },
+  ]);
 
   return (
     <article className="section">
-      <JsonLd data={jsonLd} />
+      <JsonLd data={articleLd} />
+      <JsonLd data={crumbsLd} />
       <div className="container">
         <Link href={`/${lang}/blog`} className="muted" style={{ fontSize: "0.9rem" }}>
           ← {dict.blog.backToBlog}

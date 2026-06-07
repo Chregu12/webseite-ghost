@@ -7,7 +7,7 @@ import { getSiteConfig } from "@/lib/ghost/config";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
-import { SITE_URL } from "@/lib/site";
+import { websiteLd, organizationLd } from "@/lib/jsonld";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -76,14 +76,18 @@ export default async function LangLayout({
       </head>
       <body style={accent ? ({ "--accent": accent } as React.CSSProperties) : undefined}>
         <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "WebSite",
+          data={websiteLd({
+            lang,
             name: settings?.title ?? "Mein Blog",
             description: settings?.description ?? "",
-            url: `${SITE_URL}/${lang}`,
-            inLanguage: lang,
-          }}
+          })}
+        />
+        <JsonLd
+          data={organizationLd({
+            name: settings?.title ?? "Mein Blog",
+            logo: settings?.logo,
+            sameAs: Object.values(config.footer.social ?? {}),
+          })}
         />
         <a href="#main" className="skip-link">
           {dict.actions.skipToContent}

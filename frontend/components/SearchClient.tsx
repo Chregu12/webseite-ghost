@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 export interface SearchItem {
@@ -23,6 +23,12 @@ export default function SearchClient({
   noResults: string;
 }) {
   const [query, setQuery] = useState("");
+
+  // Pre-fill from ?q= (used by the schema.org SearchAction and shared links).
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setQuery(q);
+  }, []);
 
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();
