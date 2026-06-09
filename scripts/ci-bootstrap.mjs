@@ -13,51 +13,75 @@ const H = {
   "Accept-Version": API_VERSION,
   Origin: GHOST_URL,
 };
+const SETUP_URL = `${GHOST_URL}/ghost/api/admin/authentication/setup/`;
+const SESSION_URL = `${GHOST_URL}/ghost/api/admin/session/`;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Setup the owner + log in, retrying while the admin API finishes booting
-// (the Content API can answer before admin routes are mounted -> transient 404).
-async function setupAndLogin() {
-  await fetch(`${GHOST_URL}/ghost/api/admin/authentication/setup/`, {
+// GET the setup status (no auth, does NOT count toward the login rate limit).
+async function isSetUp() {
+  try {
+    const res = await fetch(SETUP_URL, { headers: H });
+    if (!res.ok) return false;
+    const json = await res.json();
+    return Boolean(json.setup?.[0]?.status);
+  } catch {
+    return false;
+  }
+}
+
+// Create the owner and wait until setup is actually committed before logging in
+// (logging in too early returns 404; hammering it trips the 429 rate limiter).
+async function ensureSetup() {
+  if (await isSetUp()) return;
+  await fetch(SETUP_URL, {
     method: "POST",
     headers: H,
     body: JSON.stringify({
       setup: [{ name: "CI", email: EMAIL, password: PASSWORD, blogTitle: "CI Blog" }],
     }),
   }).catch(() => {});
+  for (let i = 0; i < 20; i++) {
+    if (await isSetUp()) return;
+    await sleep(3000);
+  }
+  throw new Error("Ghost setup did not complete");
+}
 
-  const login = await fetch(`${GHOST_URL}/ghost/api/admin/session/`, {
+async function loginOnce() {
+  const res = await fetch(SESSION_URL, {
     method: "POST",
     headers: H,
     body: JSON.stringify({ username: EMAIL, password: PASSWORD }),
   });
-  const cookie = login.headers
+  const cookie = res.headers
     .getSetCookie()
     .map((c) => c.split(";")[0])
     .join("; ");
-  if (!cookie) throw new Error(`login failed (status ${login.status})`);
-  return cookie;
+  return { status: res.status, cookie };
+}
+
+async function login() {
+  let { status, cookie } = await loginOnce();
+  if (status === 201 && cookie) return cookie;
+  // Back off once if rate-limited, then try a final time.
+  if (status === 429) {
+    await sleep(65000);
+    ({ status, cookie } = await loginOnce());
+    if (status === 201 && cookie) return cookie;
+  }
+  throw new Error(`login failed (status ${status})`);
 }
 
 async function main() {
-  let cookie = "";
-  let lastErr;
-  for (let i = 0; i < 15; i++) {
-    try {
-      cookie = await setupAndLogin();
-      break;
-    } catch (e) {
-      lastErr = e;
-      await sleep(3000);
-    }
-  }
-  if (!cookie) throw lastErr ?? new Error("could not authenticate");
+  await ensureSetup();
+  const cookie = await login();
+  const authed = { ...H, Cookie: cookie };
 
   // Reuse an existing integration if present, else create one.
   const list = await (
     await fetch(`${GHOST_URL}/ghost/api/admin/integrations/?include=api_keys`, {
-      headers: { ...H, Cookie: cookie },
+      headers: authed,
     })
   ).json();
   let integration = (list.integrations ?? []).find((i) => i.name === "CI");
@@ -65,7 +89,7 @@ async function main() {
   if (!integration) {
     const created = await fetch(`${GHOST_URL}/ghost/api/admin/integrations/`, {
       method: "POST",
-      headers: { ...H, Cookie: cookie },
+      headers: authed,
       body: JSON.stringify({ integrations: [{ name: "CI" }] }),
     });
     integration = (await created.json()).integrations?.[0];
