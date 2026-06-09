@@ -49,11 +49,11 @@ jobs:
           sed -i 's#^GHOST_URL=.*#GHOST_URL=http://localhost:2368#' .env
           docker compose up -d
 
-      - name: Wait for Ghost
+      - name: Wait for Ghost (admin API ready)
         run: |
-          for i in $(seq 1 40); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:2368/ghost/api/content/settings/?key=x" || true)
-            if [ "$code" = "401" ] || [ "$code" = "200" ]; then echo "ghost up"; exit 0; fi
+          for i in $(seq 1 48); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:2368/ghost/api/admin/site/" || true)
+            if [ "$code" = "200" ]; then echo "ghost admin up"; exit 0; fi
             sleep 5
           done
           echo "ghost did not become ready" && docker compose -f docker/docker-compose.yml logs ghost | tail -50 && exit 1

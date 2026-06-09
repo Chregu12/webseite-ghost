@@ -14,8 +14,11 @@ const H = {
   Origin: GHOST_URL,
 };
 
-async function main() {
-  // Create owner (ignore "already set up").
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Setup the owner + log in, retrying while the admin API finishes booting
+// (the Content API can answer before admin routes are mounted -> transient 404).
+async function setupAndLogin() {
   await fetch(`${GHOST_URL}/ghost/api/admin/authentication/setup/`, {
     method: "POST",
     headers: H,
@@ -24,7 +27,6 @@ async function main() {
     }),
   }).catch(() => {});
 
-  // First login → session cookie (the first session succeeds even without mail).
   const login = await fetch(`${GHOST_URL}/ghost/api/admin/session/`, {
     method: "POST",
     headers: H,
@@ -35,6 +37,22 @@ async function main() {
     .map((c) => c.split(";")[0])
     .join("; ");
   if (!cookie) throw new Error(`login failed (status ${login.status})`);
+  return cookie;
+}
+
+async function main() {
+  let cookie = "";
+  let lastErr;
+  for (let i = 0; i < 15; i++) {
+    try {
+      cookie = await setupAndLogin();
+      break;
+    } catch (e) {
+      lastErr = e;
+      await sleep(3000);
+    }
+  }
+  if (!cookie) throw lastErr ?? new Error("could not authenticate");
 
   // Reuse an existing integration if present, else create one.
   const list = await (
