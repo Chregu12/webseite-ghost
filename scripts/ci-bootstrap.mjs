@@ -7,7 +7,9 @@
 const GHOST_URL = (process.env.GHOST_URL ?? "http://localhost:2368").replace(/\/$/, "");
 const API_VERSION = process.env.GHOST_API_VERSION ?? "v6.0";
 const EMAIL = process.env.CI_GHOST_EMAIL ?? "ci@example.com";
-const PASSWORD = process.env.CI_GHOST_PASSWORD ?? "CIpassword12345";
+// Note: Ghost rejects "insecure" passwords (e.g. anything containing the word
+// "password") with a silent-looking 422 — keep this one validation-safe.
+const PASSWORD = process.env.CI_GHOST_PASSWORD ?? "Gh0st-CI-Bootstrap-77!";
 const H = {
   "Content-Type": "application/json",
   "Accept-Version": API_VERSION,
@@ -34,13 +36,23 @@ async function isSetUp() {
 // (logging in too early returns 404; hammering it trips the 429 rate limiter).
 async function ensureSetup() {
   if (await isSetUp()) return;
-  await fetch(SETUP_URL, {
-    method: "POST",
-    headers: H,
-    body: JSON.stringify({
-      setup: [{ name: "CI", email: EMAIL, password: PASSWORD, blogTitle: "CI Blog" }],
-    }),
-  }).catch(() => {});
+  try {
+    const res = await fetch(SETUP_URL, {
+      method: "POST",
+      headers: H,
+      body: JSON.stringify({
+        setup: [{ name: "CI", email: EMAIL, password: PASSWORD, blogTitle: "CI Blog" }],
+      }),
+    });
+    if (!res.ok) {
+      // Surface the real reason (e.g. Ghost's "insecure password" 422) instead
+      // of silently timing out below.
+      const body = await res.text().catch(() => "");
+      console.error(`setup POST -> HTTP ${res.status}: ${body.slice(0, 300)}`);
+    }
+  } catch (e) {
+    console.error("setup POST failed:", e);
+  }
   for (let i = 0; i < 20; i++) {
     if (await isSetUp()) return;
     await sleep(3000);
@@ -98,8 +110,13 @@ async function main() {
 
   const content = integration.api_keys.find((k) => k.type === "content");
   const admin = integration.api_keys.find((k) => k.type === "admin");
+  // The API serializes admin-key secrets as "id:secret" already — don't prefix
+  // the id again or JWT signing uses the wrong half (invalid signature).
+  const adminKey = admin.secret.includes(":")
+    ? admin.secret
+    : `${admin.id}:${admin.secret}`;
   console.log(`GHOST_CONTENT_API_KEY=${content.secret}`);
-  console.log(`GHOST_ADMIN_API_KEY=${admin.id}:${admin.secret}`);
+  console.log(`GHOST_ADMIN_API_KEY=${adminKey}`);
 }
 
 main().catch((e) => {
