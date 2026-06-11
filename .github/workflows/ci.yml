@@ -1,8 +1,10 @@
 name: CI
 
+# push only on main (post-merge), pull_request for feature branches —
+# otherwise every push to a PR branch triggered two identical runs.
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -11,8 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
       - name: Frontend typecheck + build
@@ -35,8 +37,8 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
 
