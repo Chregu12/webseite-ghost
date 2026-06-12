@@ -124,3 +124,20 @@ Das Skript ist **idempotent** (findet bestehende Inhalte per Slug und aktualisie
   Seiteninhalt gerendert. Es versendet per SMTP an **`CONTACT_TO`** (siehe `docker/.env`).
 - **Ähnliche Beiträge:** erscheinen automatisch unter jedem Beitrag (gleiches Haupt-Tag,
   sonst neueste Beiträge) — nichts zu pflegen.
+
+## 9. Drag-&-Drop-Page-Builder
+
+Seiten, die Startseite und Beiträge lassen sich visuell per Drag & Drop bauen (Puck):
+
+- **Aufruf:** `https://<SITE_DOMAIN>/builder?key=<BUILDER_SECRET>&type=pages&slug=<slug>&lang=de`
+  - `type=pages` für Seiten, `type=posts` für Blogbeiträge
+  - `slug=home` (bzw. `home-en`) baut die **Startseite**
+  - existiert der Slug noch nicht, wird die Seite beim ersten Speichern angelegt
+- **Bedienung:** Blöcke aus der linken Leiste in die Mitte ziehen (Hero, Überschrift, Text,
+  Bild, Button, Spalten, Sektion, CTA-Band, Abstand, Trennlinie), rechts die Felder bearbeiten,
+  oben **Publish** klicken → wird in Ghost gespeichert und live geschaltet.
+- **Spalten/Sektionen** haben eigene Ablagezonen → echtes verschachteltes Layout.
+- Eine per Builder gebaute Seite/Startseite/Beitrag wird automatisch mit diesem Layout
+  gerendert; ohne Builder-Layout greift der normale Ghost-Inhalt.
+
+> Voraussetzung: `BUILDER_SECRET` und `GHOST_ADMIN_API_KEY` sind gesetzt (siehe `docker/.env`).

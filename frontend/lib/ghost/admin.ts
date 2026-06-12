@@ -27,6 +27,31 @@ function token(): string | null {
   return `${data}.${sig}`;
 }
 
+export function adminConfigured(): boolean {
+  return ADMIN_KEY.includes(":");
+}
+
+async function adminFetch(path: string, init: RequestInit = {}) {
+  const t = token();
+  if (!t) throw new Error("GHOST_ADMIN_API_KEY not configured");
+  const res = await fetch(`${API}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Ghost ${t}`,
+      "Content-Type": "application/json",
+      "Accept-Version": API_VERSION,
+      ...(init.headers ?? {}),
+    },
+    cache: "no-store",
+  });
+  const text = await res.text();
+  const json = text ? JSON.parse(text) : {};
+  if (!res.ok) {
+    throw new Error(json?.errors?.[0]?.message ?? `HTTP ${res.status}`);
+  }
+  return json;
+}
+
 /** Fetch a post by slug incl. drafts (for preview). Returns null if not found. */
 export async function getPostBySlugAdmin(slug: string): Promise<GhostPost | null> {
   const t = token();
@@ -45,5 +70,60 @@ export async function getPostBySlugAdmin(slug: string): Promise<GhostPost | null
   } catch (err) {
     console.error("[admin] preview fetch failed:", err);
     return null;
+  }
+}
+
+export type Resource = "pages" | "posts";
+
+export interface AdminDoc {
+  id: string;
+  title: string;
+  updated_at: string;
+  plaintext: string | null;
+}
+
+/** Read a page/post (incl. drafts) for the builder. */
+export async function getDocAdmin(
+  resource: Resource,
+  slug: string,
+): Promise<AdminDoc | null> {
+  try {
+    const json = await adminFetch(
+      `/${resource}/slug/${encodeURIComponent(slug)}/?formats=plaintext`,
+    );
+    const doc = json[resource]?.[0];
+    if (!doc) return null;
+    return { id: doc.id, title: doc.title, updated_at: doc.updated_at, plaintext: doc.plaintext ?? null };
+  } catch {
+    return null;
+  }
+}
+
+/** Create or update a page/post's content (builder save). Upsert by slug. */
+export async function saveDocAdmin(
+  resource: Resource,
+  slug: string,
+  fields: { title?: string; html: string; lang?: string },
+): Promise<void> {
+  const existing = await getDocAdmin(resource, slug);
+  const tags = fields.lang ? [{ name: `#${fields.lang}` }] : undefined;
+  if (existing) {
+    await adminFetch(`/${resource}/${existing.id}/?source=html`, {
+      method: "PUT",
+      body: JSON.stringify({
+        [resource]: [
+          { html: fields.html, updated_at: existing.updated_at, ...(fields.title ? { title: fields.title } : {}) },
+        ],
+      }),
+    });
+  } else {
+    await adminFetch(`/${resource}/?source=html`, {
+      method: "POST",
+      body: JSON.stringify({
+        [resource]: [
+          { slug, title: fields.title ?? slug, html: fields.html, status: "published", ...(tags ? { tags } : {}) },
+        ],
+      }),
+    });
   }
 }

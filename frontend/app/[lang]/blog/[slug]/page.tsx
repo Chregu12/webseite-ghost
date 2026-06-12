@@ -15,7 +15,9 @@ import { locales } from "@/i18n/dictionaries";
 import { abs } from "@/lib/site";
 import { contentMetadata } from "@/lib/ghost/meta";
 import { blogPostingLd, breadcrumbLd } from "@/lib/jsonld";
+import { extractPuckData } from "@/lib/builder";
 import JsonLd from "@/components/JsonLd";
+import PuckRender from "@/components/PuckRender";
 import Comments from "@/components/Comments";
 import RelatedPosts from "@/components/sections/RelatedPosts";
 
@@ -58,6 +60,7 @@ export default async function PostPage({
   const config = await getSiteConfig(lang);
   const siteName = settings?.title ?? "Mein Blog";
   const author = post.primary_author;
+  const builderData = extractPuckData(post.plaintext);
   const related = await getRelatedPosts(post, lang, 3);
 
   const ghostPublicUrl = (
@@ -119,12 +122,18 @@ export default async function PostPage({
           {date && `${dict.blog.publishedOn} ${date}`}
         </div>
       </div>
-      <div className="container" style={{ marginTop: "2.5rem" }}>
-        <div
-          className="prose"
-          dangerouslySetInnerHTML={{ __html: post.html ?? "" }}
-        />
-      </div>
+      {builderData ? (
+        <div style={{ marginTop: "2.5rem" }}>
+          <PuckRender data={builderData} />
+        </div>
+      ) : (
+        <div className="container" style={{ marginTop: "2.5rem" }}>
+          <div
+            className="prose"
+            dangerouslySetInnerHTML={{ __html: post.html ?? "" }}
+          />
+        </div>
+      )}
       {related.length > 0 && (
         <RelatedPosts posts={related} lang={lang} title={dict.blog.related} />
       )}

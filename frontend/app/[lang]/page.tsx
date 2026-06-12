@@ -1,6 +1,8 @@
 import { getDictionary } from "@/i18n/dictionaries";
 import { getSiteConfig } from "@/lib/ghost/config";
-import { getPosts } from "@/lib/ghost/content";
+import { getPosts, getPageBySlug } from "@/lib/ghost/content";
+import { extractPuckData } from "@/lib/builder";
+import PuckRender from "@/components/PuckRender";
 import Hero from "@/components/sections/Hero";
 import Logos from "@/components/sections/Logos";
 import Features from "@/components/sections/Features";
@@ -18,6 +20,12 @@ export default async function HomePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+
+  // If a "home" page was built with the drag-and-drop builder, it wins.
+  const homeDoc = await getPageBySlug(lang === "en" ? "home-en" : "home", "plaintext");
+  const builtHome = extractPuckData(homeDoc?.plaintext);
+  if (builtHome) return <PuckRender data={builtHome} />;
+
   const dict = await getDictionary(lang);
   const config = await getSiteConfig(lang);
   const { sections } = config;

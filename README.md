@@ -6,6 +6,7 @@ Persönliche Webseite & Blog im **Antigravity-Look**, gebaut als **Headless-Setu
 - **Next.js** (App Router, TypeScript) = selbst gebautes Frontend auf den Ghost-APIs.
 - Zweisprachig **DE/EN**, dunkles Design, **Ghost-native cookielose Analytics**.
 - **MCP-Server** (`mcp/`) = headless-Zugriff für KI-Agenten (lesen + schreiben).
+- **Drag-&-Drop-Builder** (Puck) unter `/builder` für Seiten, Startseite & Beiträge.
 
 ## Komponenten
 

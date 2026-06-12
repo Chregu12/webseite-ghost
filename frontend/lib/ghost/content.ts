@@ -176,7 +176,8 @@ export async function getRelatedPosts(
 export async function getPostBySlug(slug: string): Promise<GhostPost | null> {
   const res = await ghostFetch<GhostPost>(
     `posts/slug/${encodeURIComponent(slug)}`,
-    POST_FIELDS_INCLUDE,
+    // plaintext too, so we can detect a builder (Puck) layout.
+    { ...POST_FIELDS_INCLUDE, formats: "html,plaintext" },
     ["posts", `post:${slug}`],
   );
   return res?.data?.[0] ?? null;

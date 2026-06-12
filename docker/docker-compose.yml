@@ -81,6 +81,7 @@ services:
       GHOST_API_VERSION: ${GHOST_API_VERSION:-v6.0}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET}
       PREVIEW_SECRET: ${PREVIEW_SECRET:-}
+      BUILDER_SECRET: ${BUILDER_SECRET:-}
       # Contact form (reuses the SMTP creds below)
       CONTACT_TO: ${CONTACT_TO:-}
       MAIL_FROM: ${MAIL_FROM:-}

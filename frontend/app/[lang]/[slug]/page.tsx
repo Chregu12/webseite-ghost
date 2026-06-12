@@ -7,6 +7,8 @@ import {
   isReservedPageSlug,
 } from "@/lib/ghost/content";
 import { contentMetadata } from "@/lib/ghost/meta";
+import { extractPuckData } from "@/lib/builder";
+import PuckRender from "@/components/PuckRender";
 
 // Generic route for arbitrary Ghost pages (Impressum, Datenschutz, …).
 // Static routes (blog, about, contact, search, tags, rss.xml) take precedence;
@@ -38,8 +40,12 @@ export default async function ContentPage({
 }) {
   const { slug } = await params;
   if (isReservedPageSlug(slug)) notFound();
-  const page = await getPageBySlug(slug, "html");
+  const page = await getPageBySlug(slug, "html,plaintext");
   if (!page) notFound();
+
+  // If this page was built with the drag-and-drop builder, render that layout.
+  const builder = extractPuckData(page.plaintext);
+  if (builder) return <PuckRender data={builder} />;
 
   return (
     <section className="section">

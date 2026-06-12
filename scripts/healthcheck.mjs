@@ -230,6 +230,16 @@ async function main() {
     if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
   });
 
+  await check("Frontend: builder editor route loads", async () => {
+    const { status } = await get(`${SITE_URL}/builder`);
+    if (status !== 200) throw new Error(`HTTP ${status}`);
+  });
+
+  await check("Frontend: builder API is protected (401)", async () => {
+    const res = await fetch(`${SITE_URL}/api/builder/load?type=pages&slug=x`);
+    if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
+  });
+
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);
