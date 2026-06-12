@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { uploadImageAdmin } from "@/lib/ghost/admin";
+import { builderAuthed } from "@/lib/builder";
 
 // Image upload for the builder: forwards a file to Ghost's Admin images API and
 // returns the public URL. Protected by BUILDER_SECRET.
 export async function POST(request: Request) {
-  const key = new URL(request.url).searchParams.get("key");
-  if (!process.env.BUILDER_SECRET || key !== process.env.BUILDER_SECRET) {
+  if (!builderAuthed(request)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

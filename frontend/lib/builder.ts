@@ -41,3 +41,15 @@ export function puckToHtml(data: Data): string {
 }
 
 export const EMPTY_DATA: Data = { content: [], root: {} } as Data;
+
+/** Authorize a builder API request via ?key=, a body key, or the `builder` cookie. */
+export function builderAuthed(request: Request, bodyKey?: string): boolean {
+  const secret = process.env.BUILDER_SECRET;
+  if (!secret) return false;
+  const url = new URL(request.url);
+  if (url.searchParams.get("key") === secret) return true;
+  if (bodyKey && bodyKey === secret) return true;
+  const cookie = request.headers.get("cookie") ?? "";
+  const m = cookie.match(/(?:^|;\s*)builder=([^;]+)/);
+  return !!m && decodeURIComponent(m[1]) === secret;
+}

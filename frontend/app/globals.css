@@ -496,6 +496,21 @@ h3 {
   align-self: flex-start;
 }
 
+/* ---- Builder edit button ---- */
+.builder-edit-fab {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 90;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 30px -8px var(--accent);
+}
+
 /* ---- Preview banner ---- */
 .preview-banner {
   background: var(--accent-gradient);

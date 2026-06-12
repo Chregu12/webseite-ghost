@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { saveDocAdmin, type Resource } from "@/lib/ghost/admin";
-import { puckToHtml } from "@/lib/builder";
+import { puckToHtml, builderAuthed } from "@/lib/builder";
 
 // Persist a Puck layout to the page/post content via the Admin API, then
 // revalidate. Protected by BUILDER_SECRET.
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   }
 
   const { key, type = "pages", slug, lang, title, data } = body;
-  if (!process.env.BUILDER_SECRET || key !== process.env.BUILDER_SECRET) {
+  if (!builderAuthed(request, key)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   if (!slug || !data || (type !== "pages" && type !== "posts")) {

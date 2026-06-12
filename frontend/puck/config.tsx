@@ -431,6 +431,49 @@ export const config: Config = {
       ),
     },
 
+    LogoStrip: {
+      label: "Logo-Leiste",
+      fields: {
+        title: { type: "text" },
+        logos: {
+          type: "array",
+          arrayFields: { image: imageField, alt: { type: "text" } },
+          defaultItemProps: { image: "", alt: "" },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          getItemSummary: (item: any) => item.alt || "Logo",
+        },
+      },
+      defaultProps: { title: "Womit ich arbeite", logos: [] },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, logos }: any) => (
+        <section className="section" style={{ paddingBlock: "3rem" }}>
+          <div className="container">
+            {title && (
+              <p
+                className="muted"
+                style={{ textAlign: "center", marginBottom: "1.5rem", fontSize: "0.9rem" }}
+              >
+                {title}
+              </p>
+            )}
+            <div className="logo-strip">
+              {(logos ?? [])
+                .filter((l: { image?: string }) => l.image)
+                .map((l: { image: string; alt?: string }, i: number) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={l.image}
+                    alt={l.alt ?? ""}
+                    style={{ height: 32, width: "auto", objectFit: "contain" }}
+                  />
+                ))}
+            </div>
+          </div>
+        </section>
+      ),
+    },
+
     Spacer: {
       label: "Abstand",
       fields: {
@@ -466,7 +509,7 @@ export const config: Config = {
   categories: {
     layout: { components: ["Section", "Columns", "Spacer", "Divider"] },
     content: { components: ["Heading", "Text", "ImageBlock", "Button"] },
-    sections: { components: ["Hero", "FeatureGrid", "Quote", "CtaBand"] },
+    sections: { components: ["Hero", "FeatureGrid", "Quote", "LogoStrip", "CtaBand"] },
   },
 };
 

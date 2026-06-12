@@ -141,3 +141,14 @@ Seiten, die Startseite und Beiträge lassen sich visuell per Drag & Drop bauen (
   gerendert; ohne Builder-Layout greift der normale Ghost-Inhalt.
 
 > Voraussetzung: `BUILDER_SECRET` und `GHOST_ADMIN_API_KEY` sind gesetzt (siehe `docker/.env`).
+
+**Bequemer Weg (empfohlen): „Bearbeiten"-Button**
+1. Einmal einloggen: `https://<SITE_DOMAIN>/api/builder/auth?key=<BUILDER_SECRET>&redirect=/de`
+   (setzt ein Cookie für 8 Stunden).
+2. Danach erscheint auf jeder editierbaren Seite unten links ein **„✎ Bearbeiten"**-Button,
+   der direkt in den Builder dieser Seite/dieses Beitrags führt — ohne Secret in der URL.
+3. Ausloggen: `https://<SITE_DOMAIN>/api/builder/auth?logout=1`.
+
+**Blöcke:** Hero, Feature-Karten, Zitat, Logo-Leiste, CTA-Band, Überschrift, Text, Bild
+(mit Upload), Button, Spalten, Sektion, Abstand, Trennlinie. Bilder lassen sich direkt im
+Builder hochladen (landen in Ghost).

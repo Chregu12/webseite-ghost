@@ -6,6 +6,7 @@ import { getSettings } from "@/lib/ghost/content";
 import { getSiteConfig } from "@/lib/ghost/config";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EditButton from "@/components/builder/EditButton";
 import JsonLd from "@/components/JsonLd";
 import { websiteLd, organizationLd } from "@/lib/jsonld";
 
@@ -95,6 +96,7 @@ export default async function LangLayout({
         <Header lang={lang} settings={settings} dict={dict} />
         <main id="main">{children}</main>
         <Footer config={config} dict={dict} />
+        <EditButton />
       </body>
     </html>
   );
