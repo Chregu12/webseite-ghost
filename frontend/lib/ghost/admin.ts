@@ -99,6 +99,7 @@ export interface AdminDoc {
   title: string;
   updated_at: string;
   plaintext: string | null;
+  codeinjection_head: string | null;
 }
 
 /** Read a page/post (incl. drafts) for the builder. */
@@ -112,7 +113,13 @@ export async function getDocAdmin(
     );
     const doc = json[resource]?.[0];
     if (!doc) return null;
-    return { id: doc.id, title: doc.title, updated_at: doc.updated_at, plaintext: doc.plaintext ?? null };
+    return {
+      id: doc.id,
+      title: doc.title,
+      updated_at: doc.updated_at,
+      plaintext: doc.plaintext ?? null,
+      codeinjection_head: doc.codeinjection_head ?? null,
+    };
   } catch {
     return null;
   }
@@ -122,16 +129,25 @@ export async function getDocAdmin(
 export async function saveDocAdmin(
   resource: Resource,
   slug: string,
-  fields: { title?: string; html: string; lang?: string },
+  fields: { title?: string; html: string; lang?: string; codeinjectionHead?: string },
 ): Promise<void> {
   const existing = await getDocAdmin(resource, slug);
   const tags = fields.lang ? [{ name: `#${fields.lang}` }] : undefined;
+  const codeFields =
+    fields.codeinjectionHead !== undefined
+      ? { codeinjection_head: fields.codeinjectionHead }
+      : {};
   if (existing) {
     await adminFetch(`/${resource}/${existing.id}/?source=html`, {
       method: "PUT",
       body: JSON.stringify({
         [resource]: [
-          { html: fields.html, updated_at: existing.updated_at, ...(fields.title ? { title: fields.title } : {}) },
+          {
+            html: fields.html,
+            updated_at: existing.updated_at,
+            ...(fields.title ? { title: fields.title } : {}),
+            ...codeFields,
+          },
         ],
       }),
     });
@@ -140,7 +156,14 @@ export async function saveDocAdmin(
       method: "POST",
       body: JSON.stringify({
         [resource]: [
-          { slug, title: fields.title ?? slug, html: fields.html, status: "published", ...(tags ? { tags } : {}) },
+          {
+            slug,
+            title: fields.title ?? slug,
+            html: fields.html,
+            status: "published",
+            ...(tags ? { tags } : {}),
+            ...codeFields,
+          },
         ],
       }),
     });

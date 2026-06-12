@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { saveDocAdmin, type Resource } from "@/lib/ghost/admin";
-import { puckToHtml, builderAuthed } from "@/lib/builder";
+import { getDocAdmin, saveDocAdmin, type Resource } from "@/lib/ghost/admin";
+import { puckToHtml, builderAuthed, extractPuckData, pushRevision } from "@/lib/builder";
 
 // Persist a Puck layout to the page/post content via the Admin API, then
 // revalidate. Protected by BUILDER_SECRET.
@@ -22,10 +22,14 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Keep the previous layout as a revision before overwriting.
+    const current = await getDocAdmin(type, slug);
+    const head = pushRevision(extractPuckData(current?.plaintext), current?.codeinjection_head);
     await saveDocAdmin(type, slug, {
       title,
       html: puckToHtml(data as never),
       lang,
+      codeinjectionHead: head,
     });
     revalidateTag("ghost");
     return NextResponse.json({ ok: true });

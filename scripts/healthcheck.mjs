@@ -258,6 +258,11 @@ async function main() {
     if (!Array.isArray(JSON.parse(text).posts)) throw new Error("no posts array");
   });
 
+  await check("Frontend: builder revisions API is protected (401)", async () => {
+    const res = await fetch(`${SITE_URL}/api/builder/revisions?type=pages&slug=x`);
+    if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
+  });
+
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);

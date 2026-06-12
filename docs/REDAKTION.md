@@ -149,6 +149,9 @@ Seiten, die Startseite und Beiträge lassen sich visuell per Drag & Drop bauen (
    der direkt in den Builder dieser Seite/dieses Beitrags führt — ohne Secret in der URL.
 3. Ausloggen: `https://<SITE_DOMAIN>/api/builder/auth?logout=1`.
 
-**Blöcke:** Hero, Feature-Karten, Zitat, Logo-Leiste, CTA-Band, Überschrift, Text, Bild
-(mit Upload), Button, Spalten, Sektion, Abstand, Trennlinie. Bilder lassen sich direkt im
-Builder hochladen (landen in Ghost).
+**Blöcke:** Hero, Neueste Beiträge (dynamisch, mit Tag-Filter), Feature-Karten, Zitat,
+Logo-Leiste, CTA-Band, Überschrift, Text, Bild (mit Upload), Button, Spalten, Sektion,
+Abstand, Trennlinie. Bilder lassen sich direkt im Builder hochladen (landen in Ghost).
+
+**Versionen:** Oben rechts im Builder zeigt **„◷ Versionen"** frühere Stände (max. 10) —
+mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch aufbewahrt.

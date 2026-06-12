@@ -53,3 +53,36 @@ export function builderAuthed(request: Request, bodyKey?: string): boolean {
   const m = cookie.match(/(?:^|;\s*)builder=([^;]+)/);
   return !!m && decodeURIComponent(m[1]) === secret;
 }
+
+// ---- Version history --------------------------------------------------------
+// Previous layouts are kept (newest first) in the page/post codeinjection_head
+// (a free Admin-API field, never exposed via the Content API).
+export interface Revision {
+  at: string;
+  data: Data;
+}
+export const MAX_REVISIONS = 10;
+
+export function parseRevisions(raw: string | null | undefined): Revision[] {
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? (arr as Revision[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function serializeRevisions(revs: Revision[]): string {
+  return JSON.stringify(revs.slice(0, MAX_REVISIONS));
+}
+
+/** Push the current data onto the history (newest first, capped). */
+export function pushRevision(
+  current: Data | null,
+  existingHead: string | null | undefined,
+): string {
+  const revs = parseRevisions(existingHead);
+  const next = current ? [{ at: new Date().toISOString(), data: current }, ...revs] : revs;
+  return serializeRevisions(next);
+}
