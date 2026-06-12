@@ -1,5 +1,6 @@
 import type { Config } from "@measured/puck";
 import ImageField from "@/components/builder/ImageField";
+import LatestPostsBlock from "@/components/builder/blocks/LatestPostsBlock";
 
 // Reusable image field with upload-to-Ghost support.
 const imageField = {
@@ -474,6 +475,27 @@ export const config: Config = {
       ),
     },
 
+    LatestPosts: {
+      label: "Neueste Beiträge",
+      fields: {
+        title: { type: "text" },
+        lang: {
+          type: "select",
+          options: [
+            { label: "Deutsch", value: "de" },
+            { label: "English", value: "en" },
+          ],
+        },
+        tag: { type: "text" },
+        limit: { type: "number", min: 1, max: 12 },
+      },
+      defaultProps: { title: "Neueste Beiträge", lang: "de", tag: "", limit: 3 },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, lang, tag, limit }: any) => (
+        <LatestPostsBlock title={title} lang={lang} tag={tag} limit={limit} />
+      ),
+    },
+
     Spacer: {
       label: "Abstand",
       fields: {
@@ -509,7 +531,9 @@ export const config: Config = {
   categories: {
     layout: { components: ["Section", "Columns", "Spacer", "Divider"] },
     content: { components: ["Heading", "Text", "ImageBlock", "Button"] },
-    sections: { components: ["Hero", "FeatureGrid", "Quote", "LogoStrip", "CtaBand"] },
+    sections: {
+      components: ["Hero", "FeatureGrid", "Quote", "LogoStrip", "LatestPosts", "CtaBand"],
+    },
   },
 };
 

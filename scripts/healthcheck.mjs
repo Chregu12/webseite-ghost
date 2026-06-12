@@ -252,6 +252,12 @@ async function main() {
     if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
   });
 
+  await check("Frontend: posts API (dynamic blocks) returns a list", async () => {
+    const { status, text } = await get(`${SITE_URL}/api/posts?lang=de&limit=1`);
+    if (status !== 200) throw new Error(`HTTP ${status}`);
+    if (!Array.isArray(JSON.parse(text).posts)) throw new Error("no posts array");
+  });
+
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);
