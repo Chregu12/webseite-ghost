@@ -73,6 +73,25 @@ export async function getPostBySlugAdmin(slug: string): Promise<GhostPost | null
   }
 }
 
+/** Upload an image to Ghost; returns its public URL. */
+export async function uploadImageAdmin(file: Blob, filename: string): Promise<string> {
+  const t = token();
+  if (!t) throw new Error("GHOST_ADMIN_API_KEY not configured");
+  const form = new FormData();
+  form.append("file", file, filename);
+  form.append("purpose", "image");
+  const res = await fetch(`${API}/images/upload/`, {
+    method: "POST",
+    headers: { Authorization: `Ghost ${t}`, "Accept-Version": API_VERSION },
+    body: form,
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json?.errors?.[0]?.message ?? `HTTP ${res.status}`);
+  const url = json.images?.[0]?.url;
+  if (!url) throw new Error("no image url returned");
+  return url;
+}
+
 export type Resource = "pages" | "posts";
 
 export interface AdminDoc {

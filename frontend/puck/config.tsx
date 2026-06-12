@@ -1,4 +1,14 @@
 import type { Config } from "@measured/puck";
+import ImageField from "@/components/builder/ImageField";
+
+// Reusable image field with upload-to-Ghost support.
+const imageField = {
+  type: "custom" as const,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render: ({ value, onChange }: any) => (
+    <ImageField value={value} onChange={onChange} />
+  ),
+};
 
 // Puck drag-and-drop config. Each component is a draggable block. "slot" fields
 // give real nested layout (columns/sections) — true drag-and-drop, not just a
@@ -165,7 +175,7 @@ export const config: Config = {
     ImageBlock: {
       label: "Bild",
       fields: {
-        src: { type: "text" },
+        src: imageField,
         alt: { type: "text" },
         maxWidth: { type: "text" },
         rounded: {
@@ -330,6 +340,97 @@ export const config: Config = {
       ),
     },
 
+    FeatureGrid: {
+      label: "Feature-Karten",
+      fields: {
+        title: { type: "text" },
+        items: {
+          type: "array",
+          arrayFields: {
+            title: { type: "text" },
+            text: { type: "textarea" },
+            image: imageField,
+          },
+          defaultItemProps: { title: "Feature", text: "Beschreibung", image: "" },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          getItemSummary: (item: any) => item.title || "Feature",
+        },
+      },
+      defaultProps: {
+        title: "Was ich mache",
+        items: [
+          { title: "Web-Entwicklung", text: "Moderne Sites mit Next.js & TypeScript.", image: "" },
+          { title: "Automatisierung", text: "Workflows, die Arbeit abnehmen.", image: "" },
+          { title: "KI-Integration", text: "LLMs sinnvoll in Produkte einbauen.", image: "" },
+        ],
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, items }: any) => (
+        <section className="section">
+          <div className="container">
+            {title && <h2 className="section-title">{title}</h2>}
+            <div className="grid grid-3" style={{ marginTop: "2.5rem" }}>
+              {(items ?? []).map(
+                (it: { title: string; text: string; image?: string }, i: number) => (
+                  <div key={i} className="card">
+                    {it.image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={it.image}
+                        alt=""
+                        style={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 12,
+                          marginBottom: "1rem",
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
+                    <h3>{it.title}</h3>
+                    {it.text && (
+                      <p className="muted" style={{ marginTop: "0.5rem" }}>
+                        {it.text}
+                      </p>
+                    )}
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+      ),
+    },
+
+    Quote: {
+      label: "Zitat",
+      fields: {
+        quote: { type: "textarea" },
+        person: { type: "text" },
+        image: imageField,
+      },
+      defaultProps: { quote: "Großartige Arbeit, sehr zuverlässig!", person: "Anna B.", image: "" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ quote, person, image }: any) => (
+        <section className="section">
+          <div className="container">
+            <figure className="card" style={{ margin: 0, maxWidth: 640 }}>
+              <blockquote style={{ margin: 0, fontSize: "1.15rem" }}>“{quote}”</blockquote>
+              <figcaption
+                style={{ marginTop: "1.25rem", display: "flex", alignItems: "center", gap: "0.75rem" }}
+              >
+                {image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={image} alt="" width={40} height={40} style={{ borderRadius: 999 }} />
+                )}
+                <span className="muted">{person}</span>
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+      ),
+    },
+
     Spacer: {
       label: "Abstand",
       fields: {
@@ -365,7 +466,7 @@ export const config: Config = {
   categories: {
     layout: { components: ["Section", "Columns", "Spacer", "Divider"] },
     content: { components: ["Heading", "Text", "ImageBlock", "Button"] },
-    sections: { components: ["Hero", "CtaBand"] },
+    sections: { components: ["Hero", "FeatureGrid", "Quote", "CtaBand"] },
   },
 };
 
