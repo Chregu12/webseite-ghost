@@ -155,3 +155,7 @@ Abstand, Trennlinie. Bilder lassen sich direkt im Builder hochladen (landen in G
 
 **Versionen:** Oben rechts im Builder zeigt **„◷ Versionen"** frühere Stände (max. 10) —
 mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch aufbewahrt.
+
+**Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum
+Direkt-Bearbeiten und ein Formular **„Neu anlegen"** (Typ + Slug) — die Seite/der Beitrag wird
+beim ersten Speichern in Ghost erstellt.

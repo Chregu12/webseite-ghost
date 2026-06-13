@@ -94,6 +94,28 @@ export async function uploadImageAdmin(file: Blob, filename: string): Promise<st
 
 export type Resource = "pages" | "posts";
 
+/** List pages/posts (slug, title) for the builder dashboard. */
+export async function listDocsAdmin(
+  resource: Resource,
+  limit = 50,
+): Promise<{ slug: string; title: string; updated_at: string }[]> {
+  try {
+    const params = new URLSearchParams({
+      fields: "slug,title,updated_at",
+      order: "updated_at desc",
+      limit: String(limit),
+    });
+    const json = await adminFetch(`/${resource}/?${params.toString()}`);
+    return (json[resource] ?? []).map((d: { slug: string; title: string; updated_at: string }) => ({
+      slug: d.slug,
+      title: d.title,
+      updated_at: d.updated_at,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export interface AdminDoc {
   id: string;
   title: string;
