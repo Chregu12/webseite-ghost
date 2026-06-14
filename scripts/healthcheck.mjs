@@ -258,6 +258,15 @@ async function main() {
     if (!Array.isArray(JSON.parse(text).posts)) throw new Error("no posts array");
   });
 
+  await check("Frontend: authors & tags APIs (dynamic blocks) return lists", async () => {
+    const a = await get(`${SITE_URL}/api/authors`);
+    const t = await get(`${SITE_URL}/api/tags`);
+    if (a.status !== 200 || !Array.isArray(JSON.parse(a.text).authors))
+      throw new Error("authors not a list");
+    if (t.status !== 200 || !Array.isArray(JSON.parse(t.text).tags))
+      throw new Error("tags not a list");
+  });
+
   await check("Frontend: builder revisions API is protected (401)", async () => {
     const res = await fetch(`${SITE_URL}/api/builder/revisions?type=pages&slug=x`);
     if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);

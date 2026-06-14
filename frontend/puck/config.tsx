@@ -1,6 +1,16 @@
 import type { Config } from "@measured/puck";
 import ImageField from "@/components/builder/ImageField";
 import LatestPostsBlock from "@/components/builder/blocks/LatestPostsBlock";
+import AuthorsBlock from "@/components/builder/blocks/AuthorsBlock";
+import TagCloudBlock from "@/components/builder/blocks/TagCloudBlock";
+
+const langField = {
+  type: "select" as const,
+  options: [
+    { label: "Deutsch", value: "de" },
+    { label: "English", value: "en" },
+  ],
+};
 
 // Reusable image field with upload-to-Ghost support.
 const imageField = {
@@ -496,6 +506,22 @@ export const config: Config = {
       ),
     },
 
+    Authors: {
+      label: "Autoren",
+      fields: { title: { type: "text" }, lang: langField },
+      defaultProps: { title: "Autoren", lang: "de" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, lang }: any) => <AuthorsBlock title={title} lang={lang} />,
+    },
+
+    TagCloud: {
+      label: "Tag-Wolke",
+      fields: { title: { type: "text" }, lang: langField },
+      defaultProps: { title: "Themen", lang: "de" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, lang }: any) => <TagCloudBlock title={title} lang={lang} />,
+    },
+
     Spacer: {
       label: "Abstand",
       fields: {
@@ -532,7 +558,16 @@ export const config: Config = {
     layout: { components: ["Section", "Columns", "Spacer", "Divider"] },
     content: { components: ["Heading", "Text", "ImageBlock", "Button"] },
     sections: {
-      components: ["Hero", "FeatureGrid", "Quote", "LogoStrip", "LatestPosts", "CtaBand"],
+      components: [
+        "Hero",
+        "FeatureGrid",
+        "Quote",
+        "LogoStrip",
+        "LatestPosts",
+        "Authors",
+        "TagCloud",
+        "CtaBand",
+      ],
     },
   },
 };
