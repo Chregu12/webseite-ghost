@@ -159,6 +159,11 @@ jede Seite/jeder Beitrag **duplizieren**.
 **Versionen:** Oben rechts im Builder zeigt **„◷ Versionen"** frühere Stände (max. 10) —
 mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch aufbewahrt.
 
+**Seiten-SEO im Builder:** In den Editor-Einstellungen (oben „Page"/Root) lassen sich
+**Titel, Meta-Titel und Meta-Beschreibung** pro Seite setzen — sie werden in Ghost gespeichert
+und steuern `<title>`/`<meta description>`. Das **Akkordeon/FAQ** erzeugt automatisch
+**FAQPage-Schema** (für Google/AI-Suche).
+
 **Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum
 Direkt-Bearbeiten und ein Formular **„Neu anlegen"** (Typ + Slug) — die Seite/der Beitrag wird
 beim ersten Speichern in Ghost erstellt. Pro Eintrag: **Bearbeiten**, **Veröffentlichen/Verbergen**

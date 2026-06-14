@@ -25,11 +25,15 @@ export async function POST(request: Request) {
     // Keep the previous layout as a revision before overwriting.
     const current = await getDocAdmin(type, slug);
     const head = pushRevision(extractPuckData(current?.plaintext), current?.codeinjection_head);
+    // Page-level SEO comes from the Puck root props.
+    const root = ((data as { root?: { props?: Record<string, string> } })?.root?.props) ?? {};
     await saveDocAdmin(type, slug, {
-      title,
+      title: root.title || title,
       html: puckToHtml(data as never),
       lang,
       codeinjectionHead: head,
+      metaTitle: root.metaTitle,
+      metaDescription: root.metaDescription,
     });
     revalidateTag("ghost");
     return NextResponse.json({ ok: true });

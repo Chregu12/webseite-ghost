@@ -615,25 +615,41 @@ export const config: Config = {
         ],
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: ({ title, items }: any) => (
-        <section className="section">
-          <div className="container">
-            {title && <h2 className="section-title">{title}</h2>}
-            <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.5rem", maxWidth: 760 }}>
-              {(items ?? []).map(
-                (it: { question: string; answer: string }, i: number) => (
+      render: ({ title, items }: any) => {
+        const list: { question: string; answer: string }[] = (items ?? []).filter(
+          (it: { question?: string }) => it.question,
+        );
+        const faq = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: list.map((it) => ({
+            "@type": "Question",
+            name: it.question,
+            acceptedAnswer: { "@type": "Answer", text: it.answer || "" },
+          })),
+        };
+        const json = JSON.stringify(faq).replace(/</g, "\\u003c");
+        return (
+          <section className="section">
+            <div className="container">
+              {list.length > 0 && (
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
+              )}
+              {title && <h2 className="section-title">{title}</h2>}
+              <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.5rem", maxWidth: 760 }}>
+                {list.map((it, i) => (
                   <details key={i} className="card" style={{ padding: "1rem 1.25rem" }}>
                     <summary style={{ cursor: "pointer", fontWeight: 600 }}>{it.question}</summary>
                     <p className="muted" style={{ marginTop: "0.5rem", whiteSpace: "pre-wrap" }}>
                       {it.answer}
                     </p>
                   </details>
-                ),
-              )}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      ),
+          </section>
+        );
+      },
     },
 
     Spacer: {
@@ -666,6 +682,16 @@ export const config: Config = {
         </div>
       ),
     },
+  },
+
+  root: {
+    fields: {
+      title: { type: "text" },
+      metaTitle: { type: "text" },
+      metaDescription: { type: "textarea" },
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    render: ({ children }: any) => <>{children}</>,
   },
 
   categories: {

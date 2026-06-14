@@ -175,7 +175,14 @@ export async function getDocAdmin(
 export async function saveDocAdmin(
   resource: Resource,
   slug: string,
-  fields: { title?: string; html: string; lang?: string; codeinjectionHead?: string },
+  fields: {
+    title?: string;
+    html: string;
+    lang?: string;
+    codeinjectionHead?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+  },
 ): Promise<void> {
   const existing = await getDocAdmin(resource, slug);
   const tags = fields.lang ? [{ name: `#${fields.lang}` }] : undefined;
@@ -183,6 +190,12 @@ export async function saveDocAdmin(
     fields.codeinjectionHead !== undefined
       ? { codeinjection_head: fields.codeinjectionHead }
       : {};
+  const metaFields = {
+    ...(fields.metaTitle !== undefined ? { meta_title: fields.metaTitle || null } : {}),
+    ...(fields.metaDescription !== undefined
+      ? { meta_description: fields.metaDescription || null }
+      : {}),
+  };
   if (existing) {
     await adminFetch(`/${resource}/${existing.id}/?source=html`, {
       method: "PUT",
@@ -193,6 +206,7 @@ export async function saveDocAdmin(
             updated_at: existing.updated_at,
             ...(fields.title ? { title: fields.title } : {}),
             ...codeFields,
+            ...metaFields,
           },
         ],
       }),
@@ -209,6 +223,7 @@ export async function saveDocAdmin(
             status: "published",
             ...(tags ? { tags } : {}),
             ...codeFields,
+            ...metaFields,
           },
         ],
       }),
