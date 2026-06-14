@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       codeinjectionHead: head,
       metaTitle: root.metaTitle,
       metaDescription: root.metaDescription,
+      ogImage: root.ogImage,
     });
     revalidateTag("ghost");
     return NextResponse.json({ ok: true });

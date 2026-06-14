@@ -151,7 +151,8 @@ Seiten, die Startseite und Beiträge lassen sich visuell per Drag & Drop bauen (
 
 **Blöcke:** Hero, Neueste Beiträge (dynamisch, mit Tag-Filter), Autoren, Tag-Wolke,
 Feature-Karten, Zitat, Logo-Leiste, CTA-Band, Überschrift, Text, Bild (mit Upload), Button,
-Video (YouTube/Vimeo), Akkordeon/FAQ, Spalten, Sektion, Abstand, Trennlinie. Bilder lassen
+Galerie, Statistik/Zahlen, Button-Gruppe, Newsletter, Kontaktformular, Video (YouTube/Vimeo),
+Akkordeon/FAQ, Spalten, Sektion, Abstand, Trennlinie. Bilder lassen
 sich direkt im Builder hochladen (landen in Ghost). **Hero** und **Sektion** unterstützen ein
 **Hintergrundbild**, **Sektion** zusätzlich eine **Hintergrundfarbe**. Im Dashboard lässt sich
 jede Seite/jeder Beitrag **duplizieren**.
@@ -160,8 +161,8 @@ jede Seite/jeder Beitrag **duplizieren**.
 mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch aufbewahrt.
 
 **Seiten-SEO im Builder:** In den Editor-Einstellungen (oben „Page"/Root) lassen sich
-**Titel, Meta-Titel und Meta-Beschreibung** pro Seite setzen — sie werden in Ghost gespeichert
-und steuern `<title>`/`<meta description>`. Das **Akkordeon/FAQ** erzeugt automatisch
+**Titel, Meta-Titel, Meta-Beschreibung und OG-Bild** pro Seite setzen — sie werden in Ghost
+gespeichert und steuern `<title>`/`<meta description>`/`og:image`. Das **Akkordeon/FAQ** erzeugt automatisch
 **FAQPage-Schema** (für Google/AI-Suche).
 
 **Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum

@@ -182,6 +182,7 @@ export async function saveDocAdmin(
     codeinjectionHead?: string;
     metaTitle?: string;
     metaDescription?: string;
+    ogImage?: string;
   },
 ): Promise<void> {
   const existing = await getDocAdmin(resource, slug);
@@ -195,6 +196,7 @@ export async function saveDocAdmin(
     ...(fields.metaDescription !== undefined
       ? { meta_description: fields.metaDescription || null }
       : {}),
+    ...(fields.ogImage !== undefined ? { og_image: fields.ogImage || null } : {}),
   };
   if (existing) {
     await adminFetch(`/${resource}/${existing.id}/?source=html`, {
