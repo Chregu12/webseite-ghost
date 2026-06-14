@@ -44,6 +44,17 @@ export default function Dashboard({ lang }: { lang: string }) {
     reload();
   }
 
+  async function duplicate(type: "pages" | "posts", slug: string) {
+    const toSlug = prompt(`Kopie von „${slug}“ als neuer Slug:`, `${slug}-kopie`);
+    if (!toSlug) return;
+    await fetch("/api/builder/manage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, slug, action: "duplicate", toSlug, lang }),
+    });
+    reload();
+  }
+
   function create(e: React.FormEvent) {
     e.preventDefault();
     const s = newSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
@@ -92,6 +103,9 @@ export default function Dashboard({ lang }: { lang: string }) {
               <span style={{ display: "flex", gap: ".35rem", flexShrink: 0 }}>
                 <button className="btn btn-secondary" style={btn()} onClick={() => open(type, d.slug)}>
                   Bearbeiten
+                </button>
+                <button className="btn btn-ghost" style={btn()} onClick={() => duplicate(type, d.slug)}>
+                  Duplizieren
                 </button>
                 <button
                   className="btn btn-ghost"

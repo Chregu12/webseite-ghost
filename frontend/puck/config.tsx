@@ -20,6 +20,16 @@ const langField = {
   ],
 };
 
+// Turn a YouTube/Vimeo URL into an embeddable URL.
+function toEmbed(url: string): string | null {
+  if (!url) return null;
+  let m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  if (m) return `https://www.youtube.com/embed/${m[1]}`;
+  m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return `https://player.vimeo.com/video/${m[1]}`;
+  return null;
+}
+
 // Reusable image field with upload-to-Ghost support.
 const imageField = {
   type: "custom" as const,
@@ -543,6 +553,89 @@ export const config: Config = {
       render: ({ title, lang }: any) => <TagCloudBlock title={title} lang={lang} />,
     },
 
+    Video: {
+      label: "Video",
+      fields: { url: { type: "text" }, caption: { type: "text" } },
+      defaultProps: { url: "", caption: "" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ url, caption }: any) => {
+        const embed = toEmbed(url);
+        return (
+          <section className="section">
+            <div className="container">
+              {embed ? (
+                <div
+                  style={{
+                    position: "relative",
+                    paddingTop: "56.25%",
+                    borderRadius: "var(--radius)",
+                    overflow: "hidden",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <iframe
+                    src={embed}
+                    title={caption || "Video"}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+                  />
+                </div>
+              ) : (
+                <p className="muted">Video-URL (YouTube/Vimeo) eingeben …</p>
+              )}
+              {caption && (
+                <p className="muted" style={{ marginTop: "0.75rem", textAlign: "center" }}>
+                  {caption}
+                </p>
+              )}
+            </div>
+          </section>
+        );
+      },
+    },
+
+    Accordion: {
+      label: "Akkordeon / FAQ",
+      fields: {
+        title: { type: "text" },
+        items: {
+          type: "array",
+          arrayFields: { question: { type: "text" }, answer: { type: "textarea" } },
+          defaultItemProps: { question: "Frage?", answer: "Antwort." },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          getItemSummary: (item: any) => item.question || "Eintrag",
+        },
+      },
+      defaultProps: {
+        title: "Häufige Fragen",
+        items: [
+          { question: "Wie funktioniert das?", answer: "So und so." },
+          { question: "Was kostet es?", answer: "Nichts." },
+        ],
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, items }: any) => (
+        <section className="section">
+          <div className="container">
+            {title && <h2 className="section-title">{title}</h2>}
+            <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.5rem", maxWidth: 760 }}>
+              {(items ?? []).map(
+                (it: { question: string; answer: string }, i: number) => (
+                  <details key={i} className="card" style={{ padding: "1rem 1.25rem" }}>
+                    <summary style={{ cursor: "pointer", fontWeight: 600 }}>{it.question}</summary>
+                    <p className="muted" style={{ marginTop: "0.5rem", whiteSpace: "pre-wrap" }}>
+                      {it.answer}
+                    </p>
+                  </details>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+      ),
+    },
+
     Spacer: {
       label: "Abstand",
       fields: {
@@ -577,7 +670,7 @@ export const config: Config = {
 
   categories: {
     layout: { components: ["Section", "Columns", "Spacer", "Divider"] },
-    content: { components: ["Heading", "Text", "ImageBlock", "Button"] },
+    content: { components: ["Heading", "Text", "ImageBlock", "Button", "Video"] },
     sections: {
       components: [
         "Hero",
@@ -587,6 +680,7 @@ export const config: Config = {
         "LatestPosts",
         "Authors",
         "TagCloud",
+        "Accordion",
         "CtaBand",
       ],
     },
