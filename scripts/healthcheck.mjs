@@ -268,6 +268,15 @@ async function main() {
     if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
   });
 
+  await check("Frontend: builder manage API is protected (401)", async () => {
+    const res = await fetch(`${SITE_URL}/api/builder/manage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "pages", slug: "x", action: "delete" }),
+    });
+    if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
+  });
+
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);

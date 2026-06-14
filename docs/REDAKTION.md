@@ -158,4 +158,5 @@ mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch 
 
 **Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum
 Direkt-Bearbeiten und ein Formular **„Neu anlegen"** (Typ + Slug) — die Seite/der Beitrag wird
-beim ersten Speichern in Ghost erstellt.
+beim ersten Speichern in Ghost erstellt. Pro Eintrag: **Bearbeiten**, **Veröffentlichen/Verbergen**
+(Status) und **Löschen**.
