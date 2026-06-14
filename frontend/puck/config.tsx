@@ -1,8 +1,16 @@
 import type { Config } from "@measured/puck";
 import ImageField from "@/components/builder/ImageField";
+import ColorField from "@/components/builder/ColorField";
 import LatestPostsBlock from "@/components/builder/blocks/LatestPostsBlock";
 import AuthorsBlock from "@/components/builder/blocks/AuthorsBlock";
 import TagCloudBlock from "@/components/builder/blocks/TagCloudBlock";
+
+// Reusable color field.
+const colorField = {
+  type: "custom" as const,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render: ({ value, onChange }: any) => <ColorField value={value} onChange={onChange} />,
+};
 
 const langField = {
   type: "select" as const,
@@ -79,6 +87,7 @@ export const config: Config = {
             { label: "Ringe aus", value: false },
           ],
         },
+        bgImage: imageField,
       },
       defaultProps: {
         eyebrow: "Persönlicher Blog",
@@ -89,7 +98,9 @@ export const config: Config = {
         ctaSecondaryLabel: "Über mich",
         ctaSecondaryUrl: "/de/about",
         rings: true,
+        bgImage: "",
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: ({
         eyebrow,
         headline,
@@ -99,8 +110,20 @@ export const config: Config = {
         ctaSecondaryLabel,
         ctaSecondaryUrl,
         rings,
-      }) => (
-        <section className="hero">
+        bgImage,
+      }: any) => (
+        <section
+          className="hero"
+          style={
+            bgImage
+              ? {
+                  backgroundImage: `linear-gradient(rgba(10,10,11,.6),rgba(10,10,11,.6)), url(${bgImage})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : undefined
+          }
+        >
           {rings && (
             <div className="hero-rings" aria-hidden="true">
               <span className="ring" />
@@ -292,24 +315,22 @@ export const config: Config = {
             { label: "Kompakt", value: false },
           ],
         },
-        surface: {
-          type: "radio",
-          options: [
-            { label: "Transparent", value: false },
-            { label: "Karte", value: true },
-          ],
-        },
+        bg: colorField,
+        bgImage: imageField,
         content: { type: "slot" },
       },
-      defaultProps: { padded: true, surface: false },
-      render: ({ padded, surface, ...slots }: any) => {
+      defaultProps: { padded: true, bg: "", bgImage: "" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ padded, bg, bgImage, ...slots }: any) => {
         const Content = slots.content;
+        const background = bgImage
+          ? `linear-gradient(rgba(10,10,11,.5),rgba(10,10,11,.5)), url(${bgImage}) center/cover`
+          : bg || undefined;
         return (
           <section
             style={{
               paddingBlock: padded ? "var(--space-section)" : "1rem",
-              background: surface ? "var(--surface)" : "transparent",
-              borderBlock: surface ? "1px solid var(--border)" : "none",
+              background,
             }}
           >
             <Content />

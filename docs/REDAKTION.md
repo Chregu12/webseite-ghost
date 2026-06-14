@@ -152,7 +152,8 @@ Seiten, die Startseite und Beiträge lassen sich visuell per Drag & Drop bauen (
 **Blöcke:** Hero, Neueste Beiträge (dynamisch, mit Tag-Filter), Autoren, Tag-Wolke,
 Feature-Karten, Zitat, Logo-Leiste, CTA-Band, Überschrift, Text, Bild (mit Upload), Button,
 Spalten, Sektion, Abstand, Trennlinie. Bilder lassen sich direkt im Builder hochladen
-(landen in Ghost).
+(landen in Ghost). **Hero** und **Sektion** unterstützen ein **Hintergrundbild**, **Sektion**
+zusätzlich eine **Hintergrundfarbe**.
 
 **Versionen:** Oben rechts im Builder zeigt **„◷ Versionen"** frühere Stände (max. 10) —
 mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch aufbewahrt.
