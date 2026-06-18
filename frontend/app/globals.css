@@ -496,6 +496,18 @@ h3 {
   align-self: flex-start;
 }
 
+/* ---- Builder responsive visibility utilities ---- */
+@media (max-width: 720px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+@media (min-width: 721px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
 /* ---- Builder edit button ---- */
 .builder-edit-fab {
   position: fixed;

@@ -22,6 +22,15 @@ const langField = {
   ],
 };
 
+const visibilityField = {
+  type: "select" as const,
+  options: [
+    { label: "Immer sichtbar", value: "" },
+    { label: "Nur Desktop", value: "hide-mobile" },
+    { label: "Nur Mobil", value: "hide-desktop" },
+  ],
+};
+
 // Turn a YouTube/Vimeo URL into an embeddable URL.
 function toEmbed(url: string): string | null {
   if (!url) return null;
@@ -240,6 +249,7 @@ export const config: Config = {
             <img
               src={src}
               alt={alt}
+              loading="lazy"
               style={{
                 maxWidth,
                 width: "100%",
@@ -329,17 +339,19 @@ export const config: Config = {
         },
         bg: colorField,
         bgImage: imageField,
+        visibility: visibilityField,
         content: { type: "slot" },
       },
-      defaultProps: { padded: true, bg: "", bgImage: "" },
+      defaultProps: { padded: true, bg: "", bgImage: "", visibility: "" },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: ({ padded, bg, bgImage, ...slots }: any) => {
+      render: ({ padded, bg, bgImage, visibility, ...slots }: any) => {
         const Content = slots.content;
         const background = bgImage
           ? `linear-gradient(rgba(10,10,11,.5),rgba(10,10,11,.5)), url(${bgImage}) center/cover`
           : bg || undefined;
         return (
           <section
+            className={visibility || undefined}
             style={{
               paddingBlock: padded ? "var(--space-section)" : "1rem",
               background,
@@ -747,6 +759,7 @@ export const config: Config = {
                     key={i}
                     src={im.image}
                     alt={im.alt ?? ""}
+                    loading="lazy"
                     style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius)", aspectRatio: "1" }}
                   />
                 ))}
@@ -855,6 +868,72 @@ export const config: Config = {
       ),
     },
 
+    Map: {
+      label: "Karte",
+      fields: { query: { type: "text" }, height: { type: "text" } },
+      defaultProps: { query: "Berlin", height: "360px" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ query, height }: any) => (
+        <section className="section">
+          <div className="container">
+            {query ? (
+              <iframe
+                title="Karte"
+                src={`https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`}
+                loading="lazy"
+                style={{ width: "100%", height, border: 0, borderRadius: "var(--radius)" }}
+              />
+            ) : (
+              <p className="muted">Adresse/Ort eingeben …</p>
+            )}
+          </div>
+        </section>
+      ),
+    },
+
+    SocialLinks: {
+      label: "Social-Links",
+      fields: {
+        title: { type: "text" },
+        links: {
+          type: "array",
+          arrayFields: { network: { type: "text" }, url: { type: "text" } },
+          defaultItemProps: { network: "GitHub", url: "#" },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          getItemSummary: (item: any) => item.network || "Link",
+        },
+      },
+      defaultProps: {
+        title: "",
+        links: [
+          { network: "GitHub", url: "#" },
+          { network: "Mastodon", url: "#" },
+        ],
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: ({ title, links }: any) => (
+        <section className="section">
+          <div className="container">
+            {title && <h2 className="section-title">{title}</h2>}
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", marginTop: title ? "1.5rem" : 0 }}>
+              {(links ?? []).map((l: { network: string; url: string }, i: number) => (
+                <a
+                  key={i}
+                  href={l.url}
+                  className="eyebrow"
+                  style={{ textTransform: "none" }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {l.network}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      ),
+    },
+
     Spacer: {
       label: "Abstand",
       fields: {
@@ -901,7 +980,7 @@ export const config: Config = {
   categories: {
     layout: { components: ["Section", "Columns", "Spacer", "Divider"] },
     content: {
-      components: ["Heading", "Text", "ImageBlock", "Gallery", "Button", "ButtonGroup", "Video"],
+      components: ["Heading", "Text", "ImageBlock", "Gallery", "Button", "ButtonGroup", "Video", "Map"],
     },
     sections: {
       components: [
@@ -916,6 +995,7 @@ export const config: Config = {
         "Accordion",
         "NewsletterBlock",
         "ContactBlock",
+        "SocialLinks",
         "CtaBand",
       ],
     },
