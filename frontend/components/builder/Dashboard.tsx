@@ -55,6 +55,17 @@ export default function Dashboard({ lang }: { lang: string }) {
     reload();
   }
 
+  const [themeMsg, setThemeMsg] = useState("");
+  async function applyTheme(accent: string) {
+    setThemeMsg("…");
+    const r = await fetch("/api/builder/theme", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accent }),
+    });
+    setThemeMsg(r.ok ? `Akzent gesetzt: ${accent}` : "Fehler");
+  }
+
   function create(e: React.FormEvent) {
     e.preventDefault();
     const s = newSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
@@ -145,6 +156,27 @@ export default function Dashboard({ lang }: { lang: string }) {
         <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginTop: "2rem" }}>
           {list("pages", pages)}
           {list("posts", posts)}
+        </div>
+
+        <div className="card" style={{ padding: "1.25rem", marginTop: "1.25rem" }}>
+          <h2 style={{ margin: "0 0 1rem", fontSize: "1.1rem" }}>Design — Akzentfarbe</h2>
+          <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", alignItems: "center" }}>
+            {["#6e8bff", "#b07cff", "#34d399", "#f59e0b", "#ec4899", "#22d3ee"].map((c) => (
+              <button
+                key={c}
+                onClick={() => applyTheme(c)}
+                title={c}
+                style={{ width: 32, height: 32, borderRadius: 999, background: c, border: "1px solid var(--border-strong)", cursor: "pointer" }}
+              />
+            ))}
+            <input
+              type="color"
+              onChange={(e) => applyTheme(e.target.value)}
+              title="Eigene Farbe"
+              style={{ width: 36, height: 32, padding: 0, borderRadius: 6, border: "1px solid var(--border-strong)", background: "none", cursor: "pointer" }}
+            />
+            {themeMsg && <span className="muted" style={{ fontSize: ".85rem" }}>{themeMsg}</span>}
+          </div>
         </div>
 
         <form onSubmit={create} className="card" style={{ padding: "1.25rem", marginTop: "1.25rem" }}>

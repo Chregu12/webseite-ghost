@@ -63,7 +63,7 @@ export default async function LangLayout({
   const dict = await getDictionary(lang);
   const settings = await getSettings();
   const config = await getSiteConfig(lang);
-  const accent = settings?.accent_color || undefined;
+  const accent = config.accent || settings?.accent_color || undefined;
 
   return (
     <html

@@ -15,6 +15,9 @@ const ctaSchema = z.object({
 });
 
 const siteConfigSchema = z.object({
+  // Optional accent colour override (set via the dashboard). Falls back to the
+  // Ghost brand colour when empty.
+  accent: z.string().default(""),
   hero: z
     .object({
       eyebrow: z.string().default(""),
