@@ -166,6 +166,9 @@ gespeichert und steuern `<title>`/`<meta description>`/`og:image`. Das **Akkorde
 **FAQPage-Schema** (für Google/AI-Suche).
 
 **Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum
-Direkt-Bearbeiten und ein Formular **„Neu anlegen"** (Typ + Slug) — die Seite/der Beitrag wird
-beim ersten Speichern in Ghost erstellt. Pro Eintrag: **Bearbeiten**, **Veröffentlichen/Verbergen**
-(Status) und **Löschen**.
+Direkt-Bearbeiten und ein Formular **„Neu anlegen"** (Typ + Slug). Pro Eintrag: **Bearbeiten**,
+**Duplizieren**, **Umbenennen** (Seiten, mit automatischer 308-Weiterleitung), **Veröffentlichen/
+Verbergen** und **Löschen**. Außerdem **Akzentfarbe** (Presets/Farbwähler) im Dashboard.
+
+**Vorlagen:** Im Editor speichert **„▦ Vorlagen"** das aktuelle Layout als wiederverwendbaren
+Baustein und fügt gespeicherte Vorlagen per Klick ein.

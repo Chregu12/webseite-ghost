@@ -295,6 +295,11 @@ async function main() {
     if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
   });
 
+  await check("Frontend: builder snippets API is protected (401)", async () => {
+    const res = await fetch(`${SITE_URL}/api/builder/snippets`);
+    if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
+  });
+
   // ---- Summary ----
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);
