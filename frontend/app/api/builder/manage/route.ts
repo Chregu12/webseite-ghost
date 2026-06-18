@@ -5,9 +5,17 @@ import {
   setStatusAdmin,
   getDocAdmin,
   saveDocAdmin,
+  renameDocAdmin,
   type Resource,
 } from "@/lib/ghost/admin";
-import { builderAuthed, extractPuckData, puckToHtml } from "@/lib/builder";
+import {
+  builderAuthed,
+  extractPuckData,
+  puckToHtml,
+  parseJsonArray,
+  jsonCodeBlock,
+  type Redirect2,
+} from "@/lib/builder";
 
 // Manage a page/post from the dashboard: delete, change status, or duplicate.
 // Protected by BUILDER_SECRET.
@@ -50,6 +58,21 @@ export async function POST(request: Request) {
         lang: body.lang,
       });
       ok = true;
+    } else if (action === "rename") {
+      const toSlug = (body.toSlug ?? "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+      if (!toSlug || toSlug === slug)
+        return NextResponse.json({ ok: false, error: "bad_request" }, { status: 400 });
+      ok = await renameDocAdmin(type, slug, toSlug);
+      if (ok && type === "pages") {
+        // Record a redirect from the old slug to the new one.
+        const rdoc = await getDocAdmin("pages", "builder-redirects");
+        const arr = parseJsonArray<Redirect2>(rdoc?.plaintext).filter((r) => r.from !== slug);
+        arr.unshift({ from: slug, to: toSlug });
+        await saveDocAdmin("pages", "builder-redirects", {
+          title: "Builder Redirects",
+          html: jsonCodeBlock(arr.slice(0, 300)),
+        });
+      }
     } else return NextResponse.json({ ok: false, error: "unknown_action" }, { status: 400 });
 
     if (!ok) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });

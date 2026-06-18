@@ -7,8 +7,9 @@ import {
   isReservedPageSlug,
 } from "@/lib/ghost/content";
 import { contentMetadata } from "@/lib/ghost/meta";
-import { extractPuckData } from "@/lib/builder";
+import { extractPuckData, parseJsonArray, type Redirect2 } from "@/lib/builder";
 import PuckRender from "@/components/PuckRender";
+import { permanentRedirect } from "next/navigation";
 
 // Generic route for arbitrary Ghost pages (Impressum, Datenschutz, …).
 // Static routes (blog, about, contact, search, tags, rss.xml) take precedence;
@@ -38,10 +39,16 @@ export default async function ContentPage({
 }: {
   params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { lang, slug } = await params;
   if (isReservedPageSlug(slug)) notFound();
   const page = await getPageBySlug(slug, "html,plaintext");
-  if (!page) notFound();
+  if (!page) {
+    // Honour a builder rename redirect for the old slug, else 404.
+    const rp = await getPageBySlug("builder-redirects", "plaintext");
+    const to = parseJsonArray<Redirect2>(rp?.plaintext).find((r) => r.from === slug)?.to;
+    if (to) permanentRedirect(`/${lang}/${to}`);
+    notFound();
+  }
 
   // If this page was built with the drag-and-drop builder, render that layout.
   const builder = extractPuckData(page.plaintext);

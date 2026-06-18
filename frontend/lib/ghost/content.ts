@@ -218,6 +218,8 @@ const RESERVED_PAGE_SLUGS = new Set([
   "contact-en",
   "site-config",
   "site-config-en",
+  "builder-redirects",
+  "builder-snippets",
 ]);
 
 export function isReservedPageSlug(slug: string): boolean {

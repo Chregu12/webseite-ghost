@@ -42,6 +42,35 @@ export function puckToHtml(data: Data): string {
 
 export const EMPTY_DATA: Data = { content: [], root: {} } as Data;
 
+/** Serialize a value as an HTML code block for Admin-API storage (source=html). */
+export function jsonCodeBlock(value: unknown): string {
+  const esc = JSON.stringify(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return `<pre><code>${esc}</code></pre>`;
+}
+
+export interface Redirect2 {
+  from: string;
+  to: string;
+}
+
+/** Parse a JSON array (e.g. redirects) out of a page plaintext. */
+export function parseJsonArray<T = unknown>(raw: string | null | undefined): T[] {
+  if (!raw) return [];
+  const t = raw.trim();
+  const s = t.indexOf("[");
+  const e = t.lastIndexOf("]");
+  if (s === -1 || e <= s) return [];
+  try {
+    const a = JSON.parse(t.slice(s, e + 1));
+    return Array.isArray(a) ? (a as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 /** Authorize a builder API request via ?key=, a body key, or the `builder` cookie. */
 export function builderAuthed(request: Request, bodyKey?: string): boolean {
   const secret = process.env.BUILDER_SECRET;

@@ -44,6 +44,17 @@ export default function Dashboard({ lang }: { lang: string }) {
     reload();
   }
 
+  async function rename(type: "pages" | "posts", slug: string) {
+    const toSlug = prompt(`Neuer Slug für „${slug}“:`, slug);
+    if (!toSlug || toSlug === slug) return;
+    await fetch("/api/builder/manage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, slug, action: "rename", toSlug, lang }),
+    });
+    reload();
+  }
+
   async function duplicate(type: "pages" | "posts", slug: string) {
     const toSlug = prompt(`Kopie von „${slug}“ als neuer Slug:`, `${slug}-kopie`);
     if (!toSlug) return;
@@ -118,6 +129,11 @@ export default function Dashboard({ lang }: { lang: string }) {
                 <button className="btn btn-ghost" style={btn()} onClick={() => duplicate(type, d.slug)}>
                   Duplizieren
                 </button>
+                {type === "pages" && (
+                  <button className="btn btn-ghost" style={btn()} onClick={() => rename(type, d.slug)}>
+                    Umbenennen
+                  </button>
+                )}
                 <button
                   className="btn btn-ghost"
                   style={btn()}

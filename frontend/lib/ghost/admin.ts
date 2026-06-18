@@ -126,6 +126,20 @@ export async function deleteDocAdmin(resource: Resource, slug: string): Promise<
   return true;
 }
 
+export async function renameDocAdmin(
+  resource: Resource,
+  slug: string,
+  newSlug: string,
+): Promise<boolean> {
+  const doc = await getDocAdmin(resource, slug);
+  if (!doc) return false;
+  await adminFetch(`/${resource}/${doc.id}/`, {
+    method: "PUT",
+    body: JSON.stringify({ [resource]: [{ slug: newSlug, updated_at: doc.updated_at }] }),
+  });
+  return true;
+}
+
 export async function setStatusAdmin(
   resource: Resource,
   slug: string,
