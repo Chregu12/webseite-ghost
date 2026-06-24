@@ -161,8 +161,10 @@ jede Seite/jeder Beitrag **duplizieren**.
 mit **Wiederherstellen**. Beim Speichern wird die vorherige Version automatisch aufbewahrt.
 
 **Seiten-SEO im Builder:** In den Editor-Einstellungen (oben „Page"/Root) lassen sich
-**Titel, Meta-Titel, Meta-Beschreibung und OG-Bild** pro Seite setzen — sie werden in Ghost
-gespeichert und steuern `<title>`/`<meta description>`/`og:image`. Das **Akkordeon/FAQ** erzeugt automatisch
+**Titel, Meta-Titel, Meta-Beschreibung, Keywords, OG-Bild und „nicht indexieren"** pro Seite
+setzen — sie steuern `<title>`/`<meta description>`/`<meta keywords>`/`og:image`/`robots`.
+Bei Beiträgen werden die **Keywords automatisch aus den (öffentlichen) Tags** erzeugt.
+Jedes Bild im Builder hat ein **Alt-Text-Feld** (Bildbeschreibung). Das **Akkordeon/FAQ** erzeugt automatisch
 **FAQPage-Schema** (für Google/AI-Suche).
 
 **Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum

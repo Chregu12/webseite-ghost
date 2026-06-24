@@ -16,9 +16,13 @@ export function contentMetadata(
     path: string;
     ogType?: "article" | "website";
     publishedTime?: string | null;
+    /** Comma-separated keywords (e.g. page tags). */
+    keywords?: string;
+    /** Exclude from search engines. */
+    noindex?: boolean;
   },
 ): Metadata {
-  const { lang, path, ogType = "website", publishedTime } = opts;
+  const { lang, path, ogType = "website", publishedTime, keywords, noindex } = opts;
 
   const title = item.meta_title || item.title;
   const description =
@@ -26,10 +30,15 @@ export function contentMetadata(
   const canonical = item.canonical_url || abs(`/${lang}${path}`);
   const ogImage = item.og_image || item.feature_image || undefined;
   const twitterImage = item.twitter_image || ogImage;
+  const keywordList = keywords
+    ? keywords.split(",").map((k) => k.trim()).filter(Boolean)
+    : undefined;
 
   return {
     title,
     description,
+    ...(keywordList && keywordList.length ? { keywords: keywordList } : {}),
+    ...(noindex ? { robots: { index: false, follow: false } } : {}),
     alternates: {
       canonical,
       languages: {

@@ -433,7 +433,8 @@ export const config: Config = {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={it.image}
-                        alt=""
+                        alt={it.title || ""}
+                        loading="lazy"
                         style={{
                           width: 64,
                           height: 64,
@@ -971,7 +972,15 @@ export const config: Config = {
       title: { type: "text" },
       metaTitle: { type: "text" },
       metaDescription: { type: "textarea" },
+      keywords: { type: "text" },
       ogImage: imageField,
+      noindex: {
+        type: "radio",
+        options: [
+          { label: "Indexieren", value: false },
+          { label: "Nicht indexieren", value: true },
+        ],
+      },
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     render: ({ children }: any) => <>{children}</>,

@@ -29,9 +29,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, slug } = await params;
   if (isReservedPageSlug(slug)) return {};
-  const page = await getPageBySlug(slug, "html");
+  const page = await getPageBySlug(slug, "html,plaintext");
   if (!page) return {};
-  return contentMetadata(page, { lang, path: `/${slug}`, ogType: "website" });
+  const root =
+    ((extractPuckData(page.plaintext)?.root as { props?: Record<string, unknown> })?.props) ?? {};
+  return contentMetadata(page, {
+    lang,
+    path: `/${slug}`,
+    ogType: "website",
+    keywords: root.keywords as string | undefined,
+    noindex: Boolean(root.noindex),
+  });
 }
 
 export default async function ContentPage({

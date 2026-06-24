@@ -38,11 +38,16 @@ export async function generateMetadata({
   const { lang, slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
+  const keywords = (post.tags ?? [])
+    .filter((t) => t.visibility === "public" && !t.name.startsWith("#"))
+    .map((t) => t.name)
+    .join(", ");
   return contentMetadata(post, {
     lang,
     path: `/blog/${post.slug}`,
     ogType: "article",
     publishedTime: post.published_at,
+    keywords: keywords || undefined,
   });
 }
 
