@@ -167,6 +167,10 @@ Bei Beiträgen werden die **Keywords automatisch aus den (öffentlichen) Tags** 
 Jedes Bild im Builder hat ein **Alt-Text-Feld** (Bildbeschreibung). Das **Akkordeon/FAQ** erzeugt automatisch
 **FAQPage-Schema** (für Google/AI-Suche).
 
+**Seiten-Infos (Formular):** Im Dashboard gibt es ein Formular **„Seiten-Infos"** (DE/EN) für
+Hero-Texte/CTAs, Footer-Text, **Social-Links/Kontakt** und die **Sektions-Schalter** der
+Startseite — komfortabel statt rohem JSON. (Die `site-config`-JSON-Seite bleibt als Fallback.)
+
 **Dashboard:** `/builder` **ohne** Parameter (nach dem Login) zeigt alle Seiten & Beiträge zum
 Direkt-Bearbeiten und ein Formular **„Neu anlegen"** (Typ + Slug). Pro Eintrag: **Bearbeiten**,
 **Duplizieren**, **Umbenennen** (Seiten, mit automatischer 308-Weiterleitung), **Veröffentlichen/

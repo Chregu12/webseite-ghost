@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import SiteSettings from "@/components/builder/SiteSettings";
 
 type Doc = { slug: string; title: string; status: string };
 
@@ -173,6 +174,8 @@ export default function Dashboard({ lang }: { lang: string }) {
           {list("pages", pages)}
           {list("posts", posts)}
         </div>
+
+        <SiteSettings />
 
         <div className="card" style={{ padding: "1.25rem", marginTop: "1.25rem" }}>
           <h2 style={{ margin: "0 0 1rem", fontSize: "1.1rem" }}>Design — Akzentfarbe</h2>
