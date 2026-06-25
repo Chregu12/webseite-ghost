@@ -42,13 +42,19 @@ export async function generateMetadata({
     .filter((t) => t.visibility === "public" && !t.name.startsWith("#"))
     .map((t) => t.name)
     .join(", ");
-  return contentMetadata(post, {
+  const meta = contentMetadata(post, {
     lang,
     path: `/blog/${post.slug}`,
     ogType: "article",
     publishedTime: post.published_at,
     keywords: keywords || undefined,
   });
+  // Advertise a clean markdown version for AI ingestion.
+  meta.alternates = {
+    ...meta.alternates,
+    types: { "text/markdown": abs(`/${lang}/blog/${post.slug}/llms.txt`) },
+  };
+  return meta;
 }
 
 export default async function PostPage({

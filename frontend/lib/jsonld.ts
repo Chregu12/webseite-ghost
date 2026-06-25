@@ -74,6 +74,11 @@ export function blogPostingLd(
     keywords: keywords.length ? keywords : undefined,
     mainEntityOfPage: url,
     url,
+    // Mark the main content as speakable for voice / generative assistants.
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", ".prose"],
+    },
   };
 }
 

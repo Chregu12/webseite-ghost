@@ -48,6 +48,7 @@ export async function GET() {
     "",
     "## Feeds",
     "",
+    `- [Full text (llms-full.txt)](${SITE_URL}/llms-full.txt)`,
     `- [RSS (DE)](${SITE_URL}/de/rss.xml)`,
     `- [RSS (EN)](${SITE_URL}/en/rss.xml)`,
     `- [Sitemap](${SITE_URL}/sitemap.xml)`,

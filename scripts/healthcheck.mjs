@@ -154,6 +154,18 @@ async function main() {
     if (!text.startsWith("#")) throw new Error("not markdown");
   });
 
+  await check("Frontend: /llms-full.txt (GEO full text)", async () => {
+    const { status, text } = await get(`${SITE_URL}/llms-full.txt`);
+    if (status !== 200) throw new Error(`HTTP ${status}`);
+    if (!text.startsWith("#")) throw new Error("not markdown");
+  });
+
+  await check("Frontend: home exposes googlebot max-snippet directive", async () => {
+    const { text } = await get(`${SITE_URL}/de`);
+    if (!/name="googlebot"[^>]*max-snippet/i.test(text))
+      throw new Error("no max-snippet robots directive");
+  });
+
   await check("Frontend: robots.txt allows AI crawlers + sitemap", async () => {
     const { status, text } = await get(`${SITE_URL}/robots.txt`);
     if (status !== 200) throw new Error(`HTTP ${status}`);
