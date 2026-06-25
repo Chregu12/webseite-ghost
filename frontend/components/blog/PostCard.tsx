@@ -26,7 +26,11 @@ export default function PostCard({ post, lang }: { post: GhostPost; lang: string
       )}
       <h3>{post.title}</h3>
       {excerpt && <p className="muted">{excerpt}</p>}
-      {date && <div className="post-meta">{date}</div>}
+      {date && (
+        <time className="post-meta" dateTime={post.published_at ?? undefined} style={{ display: "block" }}>
+          {date}
+        </time>
+      )}
     </Link>
   );
 }

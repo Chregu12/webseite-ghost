@@ -124,7 +124,12 @@ export default async function PostPage({
               {date ? " · " : ""}
             </>
           )}
-          {date && `${dict.blog.publishedOn} ${date}`}
+          {date && (
+            <>
+              {dict.blog.publishedOn}{" "}
+              <time dateTime={post.published_at ?? undefined}>{date}</time>
+            </>
+          )}
         </div>
       </div>
       {builderData ? (
