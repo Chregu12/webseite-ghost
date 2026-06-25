@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "blog": "Blog",
+    "about": "Über mich",
+    "contact": "Kontakt",
+    "search": "Suche"
+  },
+  "search": {
+    "title": "Suche",
+    "placeholder": "Beiträge durchsuchen…",
+    "noResults": "Keine Treffer."
+  },
+  "actions": {
+    "readMore": "Weiterlesen",
+    "subscribe": "Abonnieren",
+    "switchLanguage": "EN",
+    "toggleTheme": "Theme wechseln",
+    "skipToContent": "Zum Inhalt springen"
+  },
+  "home": {
+    "latestPostsTitle": "Neueste Beiträge",
+    "latestPostsIntro": "Gedanken, Projekte und Experimente."
+  },
+  "blog": {
+    "title": "Blog",
+    "empty": "Noch keine Beiträge veröffentlicht.",
+    "publishedOn": "Veröffentlicht am",
+    "backToBlog": "Zurück zum Blog",
+    "by": "von",
+    "postsBy": "Beiträge von",
+    "related": "Ähnliche Beiträge"
+  },
+  "contact": {
+    "name": "Name",
+    "email": "E-Mail",
+    "message": "Nachricht",
+    "send": "Senden",
+    "success": "Danke! Deine Nachricht wurde gesendet.",
+    "error": "Senden fehlgeschlagen. Bitte später erneut versuchen."
+  },
+  "preview": {
+    "banner": "Vorschau-Modus (Entwurf)",
+    "exit": "Vorschau beenden"
+  },
+  "newsletter": {
+    "placeholder": "deine@email.de",
+    "success": "Fast geschafft – bitte bestätige die E-Mail in deinem Postfach.",
+    "error": "Etwas ist schiefgelaufen. Bitte versuche es später erneut."
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten."
+  }
+}

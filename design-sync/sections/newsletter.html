@@ -1,0 +1,41 @@
+<!-- @dsCard group="Sections" name="Newsletter" subtitle="Glow-Card mit Formular" -->
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--surface:#141417;--border:rgba(255,255,255,.08);
+  --border-strong:rgba(255,255,255,.14);--text:#ededef;--text-muted:#a1a1aa;
+  --accent:#6e8bff;--accent-2:#b07cff;
+  --accent-gradient:linear-gradient(135deg,var(--accent),var(--accent-2));
+  --radius:16px;--radius-pill:999px;--font-sans:'Inter',ui-sans-serif,system-ui,sans-serif}
+@supports (color: oklch(from white l c h)){body{--accent-2:oklch(from var(--accent) l c calc(h + 38))}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+  line-height:1.6;display:grid;place-items:center;min-height:100vh;padding:2rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:720px;width:100%}
+.newsletter-card{text-align:center;padding:clamp(2rem,5vw,3.5rem);
+  background:radial-gradient(80% 120% at 50% 0%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%),var(--surface)}
+.section-title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1}
+.muted{color:var(--text-muted)}
+.newsletter-form{margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.newsletter-input{flex:1 1 280px;max-width:360px;background:var(--bg);
+  border:1px solid var(--border-strong);border-radius:var(--radius-pill);color:var(--text);
+  padding:.7rem 1.2rem;font-size:.95rem;font-family:inherit}
+.newsletter-input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;font-weight:600;font-size:.95rem;
+  padding:.7rem 1.3rem;border-radius:var(--radius-pill);border:1px solid transparent;cursor:pointer}
+.btn-primary{background:var(--accent-gradient);color:#fff}
+</style>
+</head>
+<body>
+<div class="card newsletter-card">
+  <h2 class="section-title">Bleib auf dem Laufenden</h2>
+  <p class="muted" style="margin-top:.5rem">Neue Beiträge direkt per E-Mail.</p>
+  <form class="newsletter-form" onsubmit="return false">
+    <input class="newsletter-input" type="email" placeholder="deine@email.de" aria-label="E-Mail">
+    <button class="btn btn-primary" type="submit">Abonnieren</button>
+  </form>
+</div>
+</body>
+</html>

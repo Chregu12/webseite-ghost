@@ -1,0 +1,120 @@
+# Headless Ghost 6 + MySQL 8 + Next.js + Caddy
+#
+# Local development:
+#   docker compose up -d            # starts ONLY mysql + ghost (defaults)
+#   -> Ghost admin:  http://localhost:2368/ghost
+#   -> run the frontend separately: cd ../frontend && npm install && npm run dev
+#
+# Production (adds frontend + caddy reverse proxy with TLS):
+#   docker compose --profile web up -d --build
+#   -> set SITE_DOMAIN / CMS_DOMAIN in .env first
+#
+# Copy .env.example to .env and fill in values before starting.
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  ghost:
+    image: ghost:6-alpine
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Public URL of the Ghost site (admin + APIs). Local default below.
+      url: ${GHOST_URL:-http://localhost:2368}
+      # Bind on all interfaces (IPv4) so the container is reachable and to avoid
+      # IPv6-only bind failures (EAFNOSUPPORT / code -97) on hosts without IPv6.
+      server__host: 0.0.0.0
+      server__port: "2368"
+      database__client: mysql
+      database__connection__host: mysql
+      database__connection__port: "3306"
+      database__connection__user: ${DB_USER}
+      database__connection__password: ${DB_PASSWORD}
+      database__connection__database: ${DB_NAME}
+      # Transactional mail (members magic-links / newsletter). Optional locally.
+      mail__transport: SMTP
+      mail__options__service: ${MAIL_SERVICE:-}
+      mail__options__host: ${MAIL_HOST:-}
+      mail__options__port: ${MAIL_PORT:-587}
+      mail__options__auth__user: ${MAIL_USER:-}
+      mail__options__auth__pass: ${MAIL_PASSWORD:-}
+      NODE_ENV: production
+    volumes:
+      - ghost_content:/var/lib/ghost/content
+    ports:
+      - "2368:2368"   # exposed for local development; in prod Caddy fronts this
+    networks: [internal]
+
+  # ---- Production-only services (enable with: --profile web) ----
+  frontend:
+    profiles: ["web"]
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on: [ghost]
+    environment:
+      # Internal URL used for server-side API calls (container-to-container)
+      GHOST_URL: http://ghost:2368
+      # Public URL of Ghost (used for absolute image URLs / image host allowlist)
+      GHOST_PUBLIC_URL: ${GHOST_URL}
+      GHOST_IMAGE_DOMAIN: ${CMS_DOMAIN}
+      GHOST_CONTENT_API_KEY: ${GHOST_CONTENT_API_KEY}
+      GHOST_ADMIN_API_KEY: ${GHOST_ADMIN_API_KEY:-}
+      GHOST_API_VERSION: ${GHOST_API_VERSION:-v6.0}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:-}
+      BUILDER_SECRET: ${BUILDER_SECRET:-}
+      # Contact form (reuses the SMTP creds below)
+      CONTACT_TO: ${CONTACT_TO:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+      NODE_ENV: production
+    networks: [internal]
+
+  caddy:
+    profiles: ["web"]
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [ghost, frontend]
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      CMS_DOMAIN: ${CMS_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [internal]
+
+volumes:
+  mysql_data:
+  ghost_content:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:

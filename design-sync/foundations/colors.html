@@ -1,0 +1,36 @@
+<!-- @dsCard group="Colors" name="Design Tokens" subtitle="Dark theme + Akzent-Verlauf" -->
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--surface:#141417;--surface-2:#1b1b1f;--border:rgba(255,255,255,.08);
+  --text:#ededef;--text-muted:#a1a1aa;--accent:#6e8bff;--accent-2:#b07cff;
+  --accent-gradient:linear-gradient(135deg,var(--accent),var(--accent-2));
+  --font-sans:'Inter',ui-sans-serif,system-ui,sans-serif}
+@supports (color: oklch(from white l c h)){body{--accent-2:oklch(from var(--accent) l c calc(h + 38))}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);padding:2rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));max-width:900px;margin-inline:auto}
+.swatch{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.swatch .chip{height:72px}
+.swatch .label{padding:.5rem .75rem;font-size:.78rem;color:var(--text-muted)}
+.swatch .label strong{display:block;color:var(--text);font-weight:600}
+.note{max-width:900px;margin:1.5rem auto 0;color:var(--text-muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#0a0a0b"></div><div class="label"><strong>--bg</strong>#0A0A0B</div></div>
+  <div class="swatch"><div class="chip" style="background:#141417"></div><div class="label"><strong>--surface</strong>#141417</div></div>
+  <div class="swatch"><div class="chip" style="background:#1b1b1f"></div><div class="label"><strong>--surface-2</strong>#1B1B1F</div></div>
+  <div class="swatch"><div class="chip" style="background:#ededef"></div><div class="label"><strong>--text</strong>#EDEDEF</div></div>
+  <div class="swatch"><div class="chip" style="background:#a1a1aa"></div><div class="label"><strong>--text-muted</strong>#A1A1AA</div></div>
+  <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="label"><strong>--accent</strong>aus Ghost-Admin</div></div>
+  <div class="swatch"><div class="chip" style="background:var(--accent-2)"></div><div class="label"><strong>--accent-2</strong>abgeleitet (oklch)</div></div>
+  <div class="swatch"><div class="chip" style="background:var(--accent-gradient)"></div><div class="label"><strong>--accent-gradient</strong>135°</div></div>
+</div>
+<p class="note">Die Akzentfarbe kommt aus dem Ghost-Admin (Design → Brand color). Der zweite
+Verlaufston wird automatisch daraus abgeleitet — eine Farbe steuert das ganze Theme.</p>
+</body>
+</html>

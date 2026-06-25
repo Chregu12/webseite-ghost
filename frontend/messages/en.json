@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "blog": "Blog",
+    "about": "About",
+    "contact": "Contact",
+    "search": "Search"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search posts…",
+    "noResults": "No results."
+  },
+  "actions": {
+    "readMore": "Read more",
+    "subscribe": "Subscribe",
+    "switchLanguage": "DE",
+    "toggleTheme": "Toggle theme",
+    "skipToContent": "Skip to content"
+  },
+  "home": {
+    "latestPostsTitle": "Latest posts",
+    "latestPostsIntro": "Thoughts, projects and experiments."
+  },
+  "blog": {
+    "title": "Blog",
+    "empty": "No posts published yet.",
+    "publishedOn": "Published on",
+    "backToBlog": "Back to blog",
+    "by": "by",
+    "postsBy": "Posts by",
+    "related": "Related posts"
+  },
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "success": "Thanks! Your message has been sent.",
+    "error": "Sending failed. Please try again later."
+  },
+  "preview": {
+    "banner": "Preview mode (draft)",
+    "exit": "Exit preview"
+  },
+  "newsletter": {
+    "placeholder": "you@email.com",
+    "success": "Almost there — please confirm the email in your inbox.",
+    "error": "Something went wrong. Please try again later."
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}
